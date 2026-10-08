@@ -332,15 +332,6 @@ public static class ZooDbInitializer
 
         db.Animals.Add(raccoon);
 
-        db.AuditLogs.Add(new AuditLog
-        {
-            Action = "Seed",
-            Success = true,
-            UserName = "system",
-            Role = "system",
-            Details = "Первичное наполнение БД демонстрационными данными (животное raccoon)"
-        });
-
         await db.SaveChangesAsync(ct);
         logger.LogInformation("Демонстрационные данные созданы: животное {Slug}, записей дневника: {Count}",
             raccoon.Slug, diary.Count);

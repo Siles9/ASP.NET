@@ -58,10 +58,6 @@ public class HomeController(
         return View(model);
     }
 
-    [HttpGet]
-    [Route("about")]
-    public IActionResult About() => View();
-
     [HttpGet("error")]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error() => View(new ErrorViewModel

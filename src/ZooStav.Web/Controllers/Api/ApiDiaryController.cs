@@ -1,11 +1,9 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using ZooStav.Web.Data;
 using ZooStav.Web.Domain;
-using ZooStav.Web.Hubs;
 using ZooStav.Web.Mapping;
 using ZooStav.Web.Services;
 using ZooStav.Web.ViewModels;
@@ -18,9 +16,7 @@ namespace ZooStav.Web.Controllers.Api;
 [Produces("application/json")]
 public class ApiDiaryController(
     ZooDbContext db,
-    IDiaryService diary,
-    IAuditService audit,
-    IHubContext<ZooHub> hub) : ControllerBase
+    IDiaryService diary) : ControllerBase
 {
     [HttpGet("animals/{slug}/diary")]
     [AllowAnonymous]
@@ -127,19 +123,9 @@ public class ApiDiaryController(
         };
 
         await diary.AddAsync(entry, ct);
-        await audit.WriteAsync("ApiDiaryCreate", true, $"API: создана запись дневника #{entry.Id} — {entry.Title}");
 
         entry.Animal = animal;
         entry.User = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == entry.UserId, ct);
-
-        await hub.Clients.All.SendAsync("diaryEntryCreated", new
-        {
-            id = entry.Id,
-            animalSlug = animal.Slug,
-            type = entry.Type.ToString(),
-            title = entry.Title,
-            occurredAtUtc = entry.OccurredAtUtc
-        }, ct);
 
         return CreatedAtAction(nameof(GetById), new { id = entry.Id }, ApiResponse<ApiDiaryEntryDto>.Ok(entry.ToDto()));
     }
@@ -164,7 +150,6 @@ public class ApiDiaryController(
         entry.Location = request.Location;
 
         await db.SaveChangesAsync(ct);
-        await audit.WriteAsync("ApiDiaryUpdate", true, $"API: изменена запись дневника #{entry.Id} — {entry.Title}");
 
         return Ok(ApiResponse<ApiDiaryEntryDto>.Ok(entry.ToDto()));
     }
@@ -183,7 +168,6 @@ public class ApiDiaryController(
 
         db.DiaryEntries.Remove(entry);
         await db.SaveChangesAsync(ct);
-        await audit.WriteAsync("ApiDiaryDelete", true, $"API: удалена запись дневника #{id} — {entry.Title}");
 
         return Ok(ApiResponse.OkMessage($"Запись #{id} удалена."));
     }

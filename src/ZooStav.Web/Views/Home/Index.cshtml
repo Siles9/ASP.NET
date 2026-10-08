@@ -89,48 +89,6 @@
         </div>
     </section>
 
-    <section class="zoo-section zoo-section--split">
-        <div class="zoo-card">
-            <h2>Поддомен животного</h2>
-            <p>
-                По заданию страница животного расположена на поддомене сайта зоопарка:
-                корневой домен — <code>@zoo.RootDomain</code>, страница енота — <code>raccoon.@zoo.RootDomain</code>.
-            </p>
-            <ul class="zoo-list">
-                <li><code>@zoo.MainSiteUrl</code> — главная страница зоопарка (внешний сайт)</li>
-                <li><code>https://@(Model.Animals.FirstOrDefault()?.Animal.Slug ?? "raccoon").@zoo.RootDomain/</code> — страница животного</li>
-                <li>Ссылка на главную зоопарка есть в шапке, на странице животного и в подвале сайта</li>
-            </ul>
-            <a class="btn btn-outline" asp-controller="Animal" asp-action="Routing">Как настроен роутинг →</a>
-        </div>
-
-        <div class="zoo-card">
-            <h2>Роли и доступ</h2>
-            <div class="zoo-roles">
-                <div class="zoo-role zoo-role--visitor">
-                    <h3>Посетитель <span class="zoo-badge zoo-badge--visitor">Visitor</span></h3>
-                    <ul>
-                        <li>текстовое описание и история особи</li>
-                        <li>фото- и видеогалерея</li>
-                        <li>наблюдение через веб-камеру</li>
-                        <li>донат на корм/лечение</li>
-                        <li>просмотр дневника наблюдений</li>
-                    </ul>
-                </div>
-                <div class="zoo-role zoo-role--staff">
-                    <h3>Работник зоопарка <span class="zoo-badge zoo-badge--staff">Staff</span></h3>
-                    <ul>
-                        <li>всё, что доступно посетителю</li>
-                        <li>ведение дневника: кормёжка, вакцинация, спаривание, потомство, болезни, лечение</li>
-                        <li>редактирование и удаление записей</li>
-                        <li>журнал действий и управление пользователями</li>
-                    </ul>
-                </div>
-            </div>
-            <a class="btn btn-outline" asp-controller="Account" asp-action="Demo">Тестовые логины для проверки →</a>
-        </div>
-    </section>
-
     <section class="zoo-section">
         <div class="zoo-cta-band">
             <div>
@@ -139,7 +97,6 @@
             </div>
             <div class="zoo-cta-band__actions">
                 <a class="btn btn-accent btn-lg" asp-controller="Donation" asp-action="Create">Сделать донат</a>
-                <a class="btn btn-outline-light btn-lg" asp-controller="Donation" asp-action="Index">Все донаты</a>
             </div>
         </div>
     </section>

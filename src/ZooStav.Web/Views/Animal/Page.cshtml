@@ -269,6 +269,19 @@
                 }
             </section>
 
+            <section class="zoo-card zoo-game">
+                <div class="zoo-game__head">
+                    <h2>Енот-змейка</h2>
+                    <span>Счёт <strong id="snakeScore">0</strong></span>
+                    <span>Рекорд <strong id="snakeBest">0</strong></span>
+                </div>
+                <canvas id="snakeCanvas" class="zoo-game__canvas" width="320" height="320" role="img" aria-label="Игра енот-змейка: собирайте рыбок"></canvas>
+                <div class="zoo-game__actions">
+                    <button type="button" class="btn btn-accent btn-sm" id="snakeStart">Начать</button>
+                    <span class="zoo-muted small">Стрелки или WASD, на телефоне — свайпы по полю</span>
+                </div>
+            </section>
+
             <section class="zoo-card">
                 <h2>Дневник: структура записей</h2>
                 <ul class="zoo-legend">
@@ -283,19 +296,6 @@
             </section>
 
             <section class="zoo-card">
-                <h2>API</h2>
-                <p class="zoo-muted small">Данные этой страницы доступны через REST API:</p>
-                <ul class="zoo-api-list">
-                    <li><code>GET /api/animals/@a.Slug</code></li>
-                    <li><code>GET /api/animals/@a.Slug/media</code></li>
-                    <li><code>GET /api/donations/@a.Slug/summary</code></li>
-                    <li><code>GET /api/animals/@a.Slug/diary</code></li>
-                    <li><code>POST /api/animals/@a.Slug/diary</code> <span class="zoo-muted">(Staff)</span></li>
-                </ul>
-                <a class="btn btn-outline btn-block" href="/swagger" target="_blank">Swagger UI →</a>
-            </section>
-
-            <section class="zoo-card">
                 <h2>Как добраться</h2>
                 <p class="zoo-muted small">
                     Ставрополь, Парк Победы. Вольер №7 «Лесная тропа» — в контактной зоне, справа от центрального входа.
@@ -307,3 +307,7 @@
         </aside>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/snake.js" asp-append-version="true"></script>
+}

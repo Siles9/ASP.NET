@@ -14,7 +14,6 @@ namespace ZooStav.Web.Controllers;
 public class DiaryController(
     ZooDbContext db,
     IDiaryService diary,
-    IAuditService audit,
     ZooSubdomain subdomains) : Controller
 {
     [HttpGet]
@@ -69,12 +68,6 @@ public class DiaryController(
             AvailableUsers = await db.Users
                 .Where(u => u.DiaryEntries.Any(d => filter.Slug == null || d.Animal!.Slug == filter.Slug))
                 .Select(u => u.UserName!)
-                .ToListAsync(ct),
-            Feed = await db.DiaryEntries
-                .Include(d => d.Animal)
-                .OrderByDescending(d => d.CreatedAtUtc)
-                .Take(5)
-                .AsNoTracking()
                 .ToListAsync(ct)
         };
 
@@ -153,7 +146,6 @@ public class DiaryController(
         };
 
         await diary.AddAsync(entry, ct);
-        await audit.WriteAsync("DiaryCreate", true, $"Создана запись дневника #{entry.Id} ({entry.Type}) — {entry.Title}");
 
         TempData["Toast"] = $"Запись «{entry.Title}» добавлена в дневник.";
 
@@ -208,7 +200,6 @@ public class DiaryController(
         entry.Location = model.Location;
 
         await db.SaveChangesAsync(ct);
-        await audit.WriteAsync("DiaryUpdate", true, $"Изменена запись дневника #{entry.Id} — {entry.Title}");
 
         TempData["Toast"] = "Изменения сохранены.";
         return RedirectToAction(nameof(Details), new { id });
@@ -227,7 +218,6 @@ public class DiaryController(
 
         db.DiaryEntries.Remove(entry);
         await db.SaveChangesAsync(ct);
-        await audit.WriteAsync("DiaryDelete", true, $"Удалена запись дневника #{id} — {entry.Title}");
 
         TempData["Toast"] = "Запись удалена.";
         var slug = subdomains.GetAnimalSlug(Request.Host.Host);

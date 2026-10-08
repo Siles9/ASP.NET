@@ -13,7 +13,6 @@ namespace ZooStav.Web.Controllers;
 public class DonationController(
     ZooDbContext db,
     IPaymentService payments,
-    IAuditService audit,
     ILogger<DonationController> logger) : Controller
 {
     [HttpGet]
@@ -84,9 +83,6 @@ public class DonationController(
         db.Donations.Add(donation);
         await db.SaveChangesAsync(ct);
 
-        await audit.WriteAsync("Donation", payment.Success,
-            $"Донат {donation.Amount:0.##} ₽ на «{DonationPurposes.Title(donation.Purpose)}» для {animal.Name} ({payment.Reference})");
-
         logger.LogInformation("Донат #{Id} сохранён: {Amount} ₽ ({Purpose})", donation.Id, donation.Amount, donation.Purpose);
 
         return RedirectToAction(nameof(Thanks), new { id = donation.Id });
@@ -107,22 +103,6 @@ public class DonationController(
         }
 
         return View(donation);
-    }
-
-    [HttpGet]
-    [Route("donations")]
-    public async Task<IActionResult> Index(CancellationToken ct)
-    {
-        var donations = await db.Donations
-            .Include(d => d.Animal)
-            .Where(d => d.Status == DonationStatus.Succeeded)
-            .OrderByDescending(d => d.CreatedAtUtc)
-            .Take(100)
-            .AsNoTracking()
-            .ToListAsync(ct);
-
-        ViewBag.Total = donations.Sum(d => d.Amount);
-        return View(donations);
     }
 
     private async Task<decimal> SumDonationsAsync(int animalId, CancellationToken ct)

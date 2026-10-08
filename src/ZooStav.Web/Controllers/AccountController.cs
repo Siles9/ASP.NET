@@ -1,25 +1,15 @@
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using ZooStav.Web.Domain;
-using ZooStav.Web.Infrastructure;
-using ZooStav.Web.Services;
 using ZooStav.Web.ViewModels;
 
 namespace ZooStav.Web.Controllers;
 
 public class AccountController(
     SignInManager<ZooUser> signInManager,
-    UserManager<ZooUser> userManager,
-    IAuditService audit,
-    IOptions<ZooOptions> zooOptions) : Controller
+    UserManager<ZooUser> userManager) : Controller
 {
-    private readonly ZooOptions _zoo = zooOptions.Value;
-
     [HttpGet]
     public IActionResult Login(string? returnUrl = null)
     {
@@ -50,8 +40,6 @@ public class AccountController(
 
         if (result.Succeeded)
         {
-            await audit.WriteAsync("Login", true, "Вход в веб-интерфейс", model.Email, model.Email, null);
-
             var user = await userManager.FindByEmailAsync(model.Email);
             var roles = user is null ? Array.Empty<string>() : (await userManager.GetRolesAsync(user)).ToArray();
             var isStaff = roles.Contains(ZooRoles.Staff);
@@ -69,8 +57,6 @@ public class AccountController(
                 ? RedirectToAction("Index", "Diary")
                 : RedirectToAction("Index", "Home");
         }
-
-        await audit.WriteAsync("Login", false, $"Неудачная попытка входа: {model.Email}", null, model.Email, null);
 
         ModelState.AddModelError(string.Empty, result.IsLockedOut
             ? "Учётная запись заблокирована. Попробуйте позже."
@@ -113,13 +99,11 @@ public class AccountController(
                 ModelState.AddModelError(string.Empty, error.Description);
             }
 
-            await audit.WriteAsync("Register", false, $"Ошибка регистрации {model.Email}", null, model.Email, null);
             return View(model);
         }
 
         await userManager.AddToRoleAsync(user, ZooRoles.Visitor);
         await signInManager.SignInAsync(user, isPersistent: true);
-        await audit.WriteAsync("Register", true, $"Регистрация пользователя {model.Email}", user.Id, model.Email, ZooRoles.Visitor);
 
         TempData["Toast"] = "Регистрация завершена. Добро пожаловать в зоопарк!";
         return RedirectToAction("Index", "Home");
@@ -129,7 +113,6 @@ public class AccountController(
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
-        await audit.WriteAsync("Logout", true, "Выход из веб-интерфейса");
         await signInManager.SignOutAsync();
         return RedirectToAction("Index", "Home");
     }
@@ -149,7 +132,7 @@ public class AccountController(
     }
 
     [HttpGet]
-    public async Task<IActionResult> AccessDenied(string? returnUrl = null)
+    public IActionResult AccessDenied(string? returnUrl = null)
     {
         var model = new AccessDeniedViewModel
         {
@@ -158,14 +141,6 @@ public class AccountController(
             AttemptedAction = HttpContext.Request.Query["action"].ToString()
         };
 
-        await audit.WriteAsync("AccessDenied", false,
-            $"Отказано в доступе: {returnUrl ?? Request.Path}", User.FindFirstValue(ClaimTypes.NameIdentifier),
-            User.Identity?.Name, User.FindFirstValue(ClaimTypes.Role));
-
         return View(model);
     }
-
-    [AllowAnonymous]
-    [HttpGet]
-    public IActionResult Demo() => View(_zoo);
 }

@@ -16,7 +16,6 @@ namespace ZooStav.Web.Controllers.Api;
 public class ApiDonationsController(
     ZooDbContext db,
     IPaymentService payments,
-    IAuditService audit,
     ILogger<ApiDonationsController> logger) : ControllerBase
 {
     [HttpPost]
@@ -62,9 +61,6 @@ public class ApiDonationsController(
 
         db.Donations.Add(donation);
         await db.SaveChangesAsync(ct);
-
-        await audit.WriteAsync("ApiDonation", payment.Success,
-            $"API: донат {donation.Amount:0.##} ₽ на «{DonationPurposes.Title(donation.Purpose)}» для {animal.Name}");
 
         logger.LogInformation("API-донат #{Id}: {Amount} ₽ для {Animal}", donation.Id, donation.Amount, animal.Slug);
 

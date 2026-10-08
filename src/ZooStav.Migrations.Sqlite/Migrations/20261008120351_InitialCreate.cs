@@ -76,26 +76,6 @@ namespace ZooStav.Migrations.Sqlite.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AuditLogs",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    TimestampUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Action = table.Column<string>(type: "TEXT", maxLength: 64, nullable: false),
-                    Success = table.Column<bool>(type: "INTEGER", nullable: false),
-                    UserId = table.Column<string>(type: "TEXT", maxLength: 64, nullable: true),
-                    UserName = table.Column<string>(type: "TEXT", maxLength: 128, nullable: true),
-                    Role = table.Column<string>(type: "TEXT", maxLength: 32, nullable: true),
-                    IpAddress = table.Column<string>(type: "TEXT", maxLength: 64, nullable: true),
-                    Details = table.Column<string>(type: "TEXT", maxLength: 512, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AuditLogs", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Donations",
                 columns: table => new
                 {
@@ -333,11 +313,6 @@ namespace ZooStav.Migrations.Sqlite.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_AuditLogs_TimestampUtc",
-                table: "AuditLogs",
-                column: "TimestampUtc");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_DiaryEntries_AnimalId",
                 table: "DiaryEntries",
                 column: "AnimalId");
@@ -389,9 +364,6 @@ namespace ZooStav.Migrations.Sqlite.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
-
-            migrationBuilder.DropTable(
-                name: "AuditLogs");
 
             migrationBuilder.DropTable(
                 name: "DiaryEntries");

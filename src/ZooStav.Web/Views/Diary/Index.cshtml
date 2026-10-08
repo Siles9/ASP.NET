@@ -55,7 +55,6 @@
             <div>
                 <strong>Дневник доступен авторизованным пользователям.</strong>
                 Посетители видят записи после входа; добавление и правка — только для работников (роль <code>Staff</code>).
-                Тестовые доступы: <a asp-controller="Account" asp-action="Demo">страница демо-доступа</a>.
             </div>
             <a class="btn btn-accent" asp-controller="Account" asp-action="Login">Войти</a>
         </div>
@@ -239,30 +238,8 @@
     &amp;user=keeper@@zoostav.ru
     &amp;search=вакцин
     &amp;sort=date_desc&amp;page=1&amp;pageSize=20</pre>
-                <a class="btn btn-outline btn-block" href="/swagger" target="_blank">Swagger UI →</a>
             </section>
 
-            <section class="zoo-card">
-                <h2>Лента добавления</h2>
-                <p class="zoo-muted small">Последние внесённые записи (в т.ч. через API):</p>
-                <ul class="zoo-feed" id="liveFeed">
-                    @foreach (var item in Model.Feed)
-                    {
-                        <li>
-                            <span class="zoo-tag zoo-tag--sm">@item.Type.Title()</span>
-                            <a asp-action="Details" asp-route-id="@item.Id">@item.Title</a>
-                            <small>@item.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm") · @item.CreatedVia</small>
-                        </li>
-                    }
-                </ul>
-                <span class="zoo-muted small" id="liveStatus">Живые обновления: ожидание…</span>
-            </section>
         </aside>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        window.zooLive = { hubUrl: '/hubs/zoo', animalSlug: '@(f.Slug ?? "")' };
-    </script>
-}

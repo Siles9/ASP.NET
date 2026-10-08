@@ -16,8 +16,7 @@ namespace ZooStav.Web.Controllers.Api;
 public class ApiAuthController(
     UserManager<ZooUser> userManager,
     SignInManager<ZooUser> signInManager,
-    ITokenService tokens,
-    IAuditService audit) : ControllerBase
+    ITokenService tokens) : ControllerBase
 {
     [HttpPost("register")]
     [AllowAnonymous]
@@ -54,8 +53,6 @@ public class ApiAuthController(
         var roles = await userManager.GetRolesAsync(user);
         var (token, expires) = tokens.CreateAccessToken(user, roles);
 
-        await audit.WriteAsync("ApiRegister", true, $"Регистрация через API: {request.Email}", user.Id, user.Email, ZooRoles.Visitor);
-
         return Ok(ApiResponse<ApiAuthResponse>.Ok(new ApiAuthResponse
         {
             AccessToken = token,
@@ -80,14 +77,12 @@ public class ApiAuthController(
         var user = await userManager.FindByEmailAsync(request.Email);
         if (user is null)
         {
-            await audit.WriteAsync("ApiLogin", false, $"Неудачный вход через API: {request.Email}", null, request.Email, null);
             return Unauthorized(ApiResponse.Fail("Неверный e-mail или пароль."));
         }
 
         var check = await signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
         if (!check.Succeeded)
         {
-            await audit.WriteAsync("ApiLogin", false, $"Неудачный вход через API: {request.Email}", user.Id, request.Email, null);
             return Unauthorized(ApiResponse.Fail(check.IsLockedOut
                 ? "Учётная запись заблокирована."
                 : "Неверный e-mail или пароль."));
@@ -95,9 +90,6 @@ public class ApiAuthController(
 
         var roles = await userManager.GetRolesAsync(user);
         var (token, expires) = tokens.CreateAccessToken(user, roles);
-
-        await audit.WriteAsync("ApiLogin", true, $"Вход через API: {request.Email}", user.Id, request.Email,
-            string.Join(",", roles));
 
         return Ok(ApiResponse<ApiAuthResponse>.Ok(new ApiAuthResponse
         {

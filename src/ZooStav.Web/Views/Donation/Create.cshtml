@@ -42,7 +42,7 @@
 
                     <label>
                         <span>Сумма, ₽</span>
-                        <input asp-for="Amount" type="number" min="1" step="50"/>
+                        <input asp-for="Amount" type="number" min="1" max="1000000" step="1"/>
                         <span asp-validation-for="Amount"></span>
                     </label>
 
@@ -98,21 +98,8 @@
                     <li>Лечение — вакцинация, осмотры, препараты</li>
                     <li>Уход — обогащение среды, платформы, поилки</li>
                 </ul>
-                <a class="btn btn-outline btn-block" asp-controller="Donation" asp-action="Index">Все донаты →</a>
             </section>
 
-            <section class="zoo-card">
-                <h2>API донатов</h2>
-                <pre class="zoo-code zoo-code--small">POST /api/donations
-{
-  "animalSlug": "raccoon",
-  "donorName": "Анна К.",
-  "amount": 500,
-  "purpose": "food",
-  "message": "На рыбку!"
-}</pre>
-                <a class="btn btn-outline btn-block" href="/swagger" target="_blank">Swagger UI →</a>
-            </section>
         </aside>
     </div>
 </div>

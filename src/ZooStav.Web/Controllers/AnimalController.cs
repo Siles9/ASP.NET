@@ -106,16 +106,4 @@ public class AnimalController(
         return View(model);
     }
 
-    [HttpGet("routing", Name = "animal-routing")]
-    public async Task<IActionResult> Routing(CancellationToken ct)
-    {
-        var animals = await db.Animals.AsNoTracking().Select(a => a.Slug).ToListAsync(ct);
-        ViewBag.Host = Request.Host.Value;
-        ViewBag.DetectedSlug = subdomains.GetAnimalSlug(Request.Host.Host);
-        ViewBag.RootDomain = _zoo.RootDomain;
-        ViewBag.MainSite = _zoo.MainSiteUrl;
-        ViewBag.AnimalUrls = animals.Select(subdomains.BuildAnimalUrl).ToList();
-        ViewBag.AnimalUrlsLocal = animals.Select(s => subdomains.BuildAnimalUrlForRequest(s, Request)).ToList();
-        return View();
-    }
 }

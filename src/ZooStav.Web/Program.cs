@@ -10,10 +10,8 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
 using ZooStav.Web.Data;
 using ZooStav.Web.Domain;
-using ZooStav.Web.Hubs;
 using ZooStav.Web.Infrastructure;
 using ZooStav.Web.Services;
 
@@ -129,18 +127,6 @@ builder.Services
 
         options.Events = new JwtBearerEvents
         {
-            OnMessageReceived = context =>
-            {
-                var accessToken = context.Request.Query["access_token"];
-                var path = context.HttpContext.Request.Path;
-
-                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
-                {
-                    context.Token = accessToken;
-                }
-
-                return Task.CompletedTask;
-            },
             OnChallenge = context =>
             {
                 context.HandleResponse();
@@ -191,46 +177,14 @@ builder.Services
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
 
-builder.Services.AddSignalR().AddJsonProtocol(o => o.PayloadSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<ZooSubdomain>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IDiaryService, DiaryService>();
-builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddSingleton<IPaymentService, MockPaymentService>();
 
 builder.Services.AddSingleton<HtmlEncoder>(HtmlEncoder.Create(UnicodeRanges.All));
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "ZooStav API — Енот-полоскун",
-        Version = "v1",
-        Description = "REST API страницы животного зоопарка (поддомен raccoon.zoostav.ru): " +
-                      "информация об особи, медиатека, веб-камера, донаты и дневник наблюдений. " +
-                      "Авторизация — JWT Bearer (POST /api/auth/login). Роль Staff требуется для записи в дневник."
-    });
-
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Вставьте accessToken, полученный в POST /api/auth/login"
-    });
-
-    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
-    {
-        [new OpenApiSecuritySchemeReference("Bearer", document)] = []
-    });
-
-    options.UseInlineDefinitionsForEnums();
-});
 
 var app = builder.Build();
 
@@ -259,29 +213,9 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseSwagger();
-app.UseSwaggerUI(options =>
-{
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "ZooStav API v1");
-    options.DocumentTitle = "ZooStav API — страница животного";
-    options.RoutePrefix = "swagger";
-});
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
-app.MapHub<ZooHub>("/hubs/zoo");
-
-app.MapGet("/health", () => Results.Ok(new
-{
-    status = "ok",
-    service = "ZooStav.Web",
-    database = dbProvider,
-    rootDomain = zooOptions.RootDomain,
-    mainSite = zooOptions.MainSiteUrl,
-    timeUtc = DateTime.UtcNow
-})).AllowAnonymous();
 
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 try

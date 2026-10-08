@@ -48,10 +48,8 @@
                 <ul class="zoo-list">
                     <li>ведение дневника наблюдений: кормёжка, вакцинация, спаривание, потомство, болезни, лечение</li>
                     <li>редактирование и удаление любых записей дневника</li>
-                    <li>журнал действий пользователей и управление ролями</li>
                     <li>доступ к API-методам записи (<code>POST/PUT/DELETE /api/diary…</code>)</li>
                 </ul>
-                <a class="btn btn-outline" asp-controller="Staff" asp-action="Audit">Журнал действий →</a>
             }
             else
             {
@@ -62,8 +60,7 @@
                     <li>просмотр дневника наблюдений</li>
                 </ul>
                 <p class="zoo-muted small">
-                    Для получения роли <code>Staff</code> обратитесь к администрации зоопарка —
-                    роль назначается в разделе «Пользователи» (доступен работникам).
+                    Для получения роли <code>Staff</code> обратитесь к администрации зоопарка.
                 </p>
             }
         </section>
@@ -78,6 +75,5 @@
   -H "Content-Type: application/json" \
   -d '{"email":"keeper@zoostav.ru","password":"Keeper#2026"}'
 curl https://raccoon.zoostav.ru/api/auth/me -H "Authorization: Bearer &lt;accessToken&gt;"</pre>
-        <a class="btn btn-outline" href="/swagger" target="_blank">Swagger UI →</a>
     </section>
 </div>

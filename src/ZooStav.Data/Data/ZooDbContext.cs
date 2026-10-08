@@ -14,7 +14,6 @@ public class ZooDbContext : IdentityDbContext<ZooUser>
     public DbSet<MediaItem> MediaItems => Set<MediaItem>();
     public DbSet<DiaryEntry> DiaryEntries => Set<DiaryEntry>();
     public DbSet<Donation> Donations => Set<Donation>();
-    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     private void NormalizeDiarySearchText()
     {
@@ -82,6 +81,5 @@ public class ZooDbContext : IdentityDbContext<ZooUser>
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        builder.Entity<AuditLog>(e => e.HasIndex(a => a.TimestampUtc));
     }
 }

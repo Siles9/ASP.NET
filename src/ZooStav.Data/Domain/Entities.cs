@@ -199,30 +199,3 @@ public static class DonationPurposes
         _ => "Корм"
     };
 }
-
-public class AuditLog
-{
-    public long Id { get; set; }
-
-    public DateTime TimestampUtc { get; set; } = DateTime.UtcNow;
-
-    [MaxLength(64)]
-    public string Action { get; set; } = string.Empty;
-
-    public bool Success { get; set; }
-
-    [MaxLength(64)]
-    public string? UserId { get; set; }
-
-    [MaxLength(128)]
-    public string? UserName { get; set; }
-
-    [MaxLength(32)]
-    public string? Role { get; set; }
-
-    [MaxLength(64)]
-    public string? IpAddress { get; set; }
-
-    [MaxLength(512)]
-    public string Details { get; set; } = string.Empty;
-}

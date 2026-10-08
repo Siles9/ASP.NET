@@ -76,26 +76,6 @@ namespace ZooStav.Migrations.SqlServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AuditLogs",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TimestampUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Action = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
-                    Success = table.Column<bool>(type: "bit", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
-                    UserName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
-                    Role = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: true),
-                    IpAddress = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
-                    Details = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AuditLogs", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Donations",
                 columns: table => new
                 {
@@ -335,11 +315,6 @@ namespace ZooStav.Migrations.SqlServer.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AuditLogs_TimestampUtc",
-                table: "AuditLogs",
-                column: "TimestampUtc");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_DiaryEntries_AnimalId",
                 table: "DiaryEntries",
                 column: "AnimalId");
@@ -391,9 +366,6 @@ namespace ZooStav.Migrations.SqlServer.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
-
-            migrationBuilder.DropTable(
-                name: "AuditLogs");
 
             migrationBuilder.DropTable(
                 name: "DiaryEntries");

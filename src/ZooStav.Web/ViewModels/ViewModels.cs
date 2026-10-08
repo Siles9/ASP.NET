@@ -26,7 +26,6 @@ public class DiaryIndexViewModel
     public DiaryFilter Filter { get; set; } = new();
     public Animal? Animal { get; set; }
     public List<string> AvailableUsers { get; set; } = new();
-    public List<DiaryEntry> Feed { get; set; } = new();
 
     public Dictionary<DiaryEntryType, int> TypeStats { get; set; } = new();
 }
