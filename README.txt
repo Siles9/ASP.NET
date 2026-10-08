@@ -148,3 +148,12 @@ Docker (приложение + SQL Server):  docker compose up --build  →  htt
   Jwt__Key                     длинный секрет (вместо демонстрационного)
   ConnectionStrings__SqlServer строка подключения к боевой базе
   ASPNETCORE_ENVIRONMENT       Production
+
+
+10. ЕСЛИ БАЗА СОЗДАЛАСЬ БЕЗ ТАБЛИЦ
+----------------------------------
+Приложение в режиме разработки останавливается при ошибке инициализации БД
+и пишет её причину в консоль. Если таблиц нет, а ошибка повторяется:
+  1. Удалите базу ZooStavRaccoon (SQL Server Object Explorer в Visual Studio,
+     SSMS или: sqlcmd -S "(localdb)\MSSQLLocalDB" -Q "DROP DATABASE ZooStavRaccoon").
+  2. Запустите приложение снова.
