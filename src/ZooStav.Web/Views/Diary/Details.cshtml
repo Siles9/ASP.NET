@@ -45,7 +45,6 @@
             <li><span>Автор записи</span><code>@(Model.User?.UserName ?? "—")</code></li>
             <li><span>Источник</span><code>@Model.CreatedVia</code></li>
             <li><span>Создано</span><code>@Model.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</code></li>
-            <li><span>API</span><code>GET /api/diary/@Model.Id</code></li>
         </ul>
     </section>
 </div>

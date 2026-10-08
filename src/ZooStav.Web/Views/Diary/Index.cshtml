@@ -228,17 +228,6 @@
                 </ul>
             </section>
 
-            <section class="zoo-card">
-                <h2>Фильтрация через API</h2>
-                <p class="zoo-muted small">Те же фильтры доступны в REST API — по дате, типу, пользователю и тексту:</p>
-                <pre class="zoo-code zoo-code--small">GET /api/animals/@(f.Slug ?? "raccoon")/diary
-    ?type=Vaccination
-    &amp;dateFrom=@DateTime.UtcNow.AddMonths(-6).ToString("yyyy-MM-dd")
-    &amp;dateTo=@DateTime.UtcNow.ToString("yyyy-MM-dd")
-    &amp;user=keeper@@zoostav.ru
-    &amp;search=вакцин
-    &amp;sort=date_desc&amp;page=1&amp;pageSize=20</pre>
-            </section>
 
         </aside>
     </div>
