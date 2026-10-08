@@ -1,0 +1,270 @@
+@model DiaryIndexViewModel
+@{
+    ViewData["Title"] = "Дневник наблюдений";
+    var f = Model.Filter;
+    var isStaff = (bool)(ViewBag.IsStaff ?? false);
+    var isAuth = User.Identity?.IsAuthenticated == true;
+    var result = Model.Page;
+
+    var routeValues = new Dictionary<string, string>();
+    if (!string.IsNullOrEmpty(f.Slug)) routeValues["slug"] = f.Slug!;
+    if (f.Type is not null) routeValues["type"] = f.Type.ToString()!;
+    if (f.DateFrom is not null) routeValues["dateFrom"] = f.DateFrom.Value.ToString("yyyy-MM-dd");
+    if (f.DateTo is not null) routeValues["dateTo"] = f.DateTo.Value.ToString("yyyy-MM-dd");
+    if (!string.IsNullOrEmpty(f.UserName)) routeValues["user"] = f.UserName!;
+    if (!string.IsNullOrEmpty(f.Search)) routeValues["search"] = f.Search!;
+    routeValues["sort"] = f.Sort;
+    routeValues["pageSize"] = f.PageSize.ToString();
+}
+
+<div class="container">
+    <header class="zoo-page-head">
+        <div>
+            <h1>Дневник наблюдений</h1>
+            <p class="zoo-muted">
+                @if (Model.Animal is not null)
+                {
+                    <span>Животное: <strong>@Model.Animal.Name</strong> (@Model.Animal.Enclosure) · </span>
+                    <a asp-controller="Animal" asp-action="Page" asp-route-slug="@Model.Animal.Slug">страница животного →</a>
+                }
+                else
+                {
+                    <span>Все записи по всем животным зоопарка</span>
+                }
+            </p>
+        </div>
+        <div class="zoo-page-head__actions">
+            @if (isStaff)
+            {
+                <a class="btn btn-accent" asp-action="Create" asp-route-animalId="@ViewBag.AnimalId">✚ Новая запись</a>
+            }
+            else if (isAuth)
+            {
+                <span class="zoo-badge zoo-badge--visitor">Режим просмотра: запись доступна работникам зоопарка</span>
+            }
+            else
+            {
+                <a class="btn btn-outline" asp-controller="Account" asp-action="Login">Войти</a>
+            }
+        </div>
+    </header>
+
+    @if (!isAuth)
+    {
+        <div class="zoo-callout zoo-callout--warning">
+            <div>
+                <strong>Дневник доступен авторизованным пользователям.</strong>
+                Посетители видят записи после входа; добавление и правка — только для работников (роль <code>Staff</code>).
+                Тестовые доступы: <a asp-controller="Account" asp-action="Demo">страница демо-доступа</a>.
+            </div>
+            <a class="btn btn-accent" asp-controller="Account" asp-action="Login">Войти</a>
+        </div>
+    }
+
+    <section class="zoo-card zoo-filter">
+        <form method="get" asp-action="Index" class="zoo-filter__form">
+            @if (!string.IsNullOrEmpty(f.Slug))
+            {
+                <input type="hidden" name="slug" value="@f.Slug"/>
+            }
+
+            <div class="zoo-filter__row">
+                <label>
+                    <span>Тип записи</span>
+                    <select name="type">
+                        <option value="">— все типы —</option>
+                        @foreach (var type in Enum.GetValues<DiaryEntryType>())
+                        {
+                            <option value="@type" selected="@(f.Type == type)">@type.Icon() @type.Title()</option>
+                        }
+                    </select>
+                </label>
+
+                <label>
+                    <span>Дата с</span>
+                    <input type="date" name="dateFrom" value="@f.DateFrom?.ToString("yyyy-MM-dd")"/>
+                </label>
+
+                <label>
+                    <span>Дата по</span>
+                    <input type="date" name="dateTo" value="@f.DateTo?.ToString("yyyy-MM-dd")"/>
+                </label>
+
+                <label>
+                    <span>Автор записи</span>
+                    <select name="user">
+                        <option value="">— все пользователи —</option>
+                        @foreach (var user in Model.AvailableUsers)
+                        {
+                            <option value="@user" selected="@(f.UserName == user)">@user</option>
+                        }
+                    </select>
+                </label>
+
+                <label class="zoo-filter__search">
+                    <span>Поиск по тексту</span>
+                    <input type="search" name="search" value="@f.Search" placeholder="например, кормление, отит"/>
+                </label>
+
+                <label>
+                    <span>Сортировка</span>
+                    <select name="sort">
+                        <option value="date_desc" selected="@(f.Sort == "date_desc")">Дата события: новые сверху</option>
+                        <option value="date_asc" selected="@(f.Sort == "date_asc")">Дата события: старые сверху</option>
+                        <option value="type" selected="@(f.Sort == "type")">По типу записи</option>
+                        <option value="user" selected="@(f.Sort == "user")">По автору</option>
+                        <option value="created_desc" selected="@(f.Sort == "created_desc")">По дате создания</option>
+                    </select>
+                </label>
+
+                <label>
+                    <span>На странице</span>
+                    <select name="pageSize">
+                        @foreach (var size in new[] { 5, 10, 20, 50 })
+                        {
+                            <option value="@size" selected="@(f.PageSize == size)">@size</option>
+                        }
+                    </select>
+                </label>
+
+                <div class="zoo-filter__buttons">
+                    <button type="submit" class="btn btn-accent">Применить фильтр</button>
+                    <a class="btn btn-outline" asp-action="Index" asp-route-slug="@f.Slug">Сбросить</a>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <div class="zoo-section zoo-section--split zoo-section--diary">
+        <div>
+            <div class="zoo-results">
+                Найдено записей: <strong>@result.TotalCount</strong>
+                @if (result.TotalPages > 1)
+                {
+                    <span> · страница @result.Page из @result.TotalPages</span>
+                }
+            </div>
+
+            @if (!result.Items.Any())
+            {
+                <div class="zoo-card zoo-empty">
+                    <p>По заданным условиям записей не найдено. Попробуйте изменить период или тип записи.</p>
+                </div>
+            }
+            else
+            {
+                <ul class="zoo-timeline">
+                    @foreach (var entry in result.Items)
+                    {
+                        <li class="zoo-timeline__item @entry.Type.CssClass()">
+                            <div class="zoo-timeline__icon">@entry.Type.Icon()</div>
+                            <div class="zoo-timeline__body">
+                                <div class="zoo-timeline__meta">
+                                    <span class="zoo-tag">@entry.Type.Title()</span>
+                                    <time>@entry.OccurredAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</time>
+                                    <span class="zoo-muted">· @entry.PerformedBy</span>
+                                    @if (entry.User is not null)
+                                    {
+                                        <span class="zoo-muted">· автор: <code>@entry.User.UserName</code></span>
+                                    }
+                                    <span class="zoo-muted">· источник: @(entry.CreatedVia == "Api" ? "API" : "веб")</span>
+                                </div>
+                                <a class="zoo-timeline__title" asp-action="Details" asp-route-id="@entry.Id">@entry.Title</a>
+                                <p class="zoo-timeline__text">@entry.Description</p>
+                                <div class="zoo-timeline__actions">
+                                    <a class="btn btn-sm btn-outline" asp-action="Details" asp-route-id="@entry.Id">Подробнее</a>
+                                    @if (isStaff)
+                                    {
+                                        <a class="btn btn-sm btn-outline" asp-action="Edit" asp-route-id="@entry.Id">Изменить</a>
+                                        <form asp-action="Delete" asp-route-id="@entry.Id" method="post" class="d-inline"
+                                              onsubmit="return confirm('Удалить запись «@entry.Title»?');">
+                                            <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+
+                @if (result.TotalPages > 1)
+                {
+                    <nav class="zoo-pagination">
+                        @if (result.HasPrevious)
+                        {
+                            routeValues["page"] = (result.Page - 1).ToString();
+                            <a class="btn btn-outline btn-sm" asp-action="Index" asp-all-route-data="routeValues">← Назад</a>
+                        }
+
+                        @for (var i = Math.Max(1, result.Page - 2); i <= Math.Min(result.TotalPages, result.Page + 2); i++)
+                        {
+                            routeValues["page"] = i.ToString();
+                            <a class="btn btn-sm @(i == result.Page ? "btn-accent" : "btn-outline")"
+                               asp-action="Index" asp-all-route-data="routeValues">@i</a>
+                        }
+
+                        @if (result.HasNext)
+                        {
+                            routeValues["page"] = (result.Page + 1).ToString();
+                            <a class="btn btn-outline btn-sm" asp-action="Index" asp-all-route-data="routeValues">Вперёд →</a>
+                        }
+                    </nav>
+                }
+            }
+        </div>
+
+        <aside>
+            <section class="zoo-card">
+                <h2>Сводка по типам</h2>
+                <ul class="zoo-stats-list">
+                    @foreach (var type in Enum.GetValues<DiaryEntryType>())
+                    {
+                        var count = Model.TypeStats.TryGetValue(type, out var c) ? c : 0;
+                        <li class="@(f.Type == type ? "is-active" : "")">
+                            <a asp-action="Index" asp-route-slug="@f.Slug" asp-route-type="@type">
+                                <span>@type.Icon() @type.Title()</span>
+                                <strong>@count</strong>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </section>
+
+            <section class="zoo-card">
+                <h2>Фильтрация через API</h2>
+                <p class="zoo-muted small">Те же фильтры доступны в REST API — по дате, типу, пользователю и тексту:</p>
+                <pre class="zoo-code zoo-code--small">GET /api/animals/@(f.Slug ?? "raccoon")/diary
+    ?type=Vaccination
+    &amp;dateFrom=@DateTime.UtcNow.AddMonths(-6).ToString("yyyy-MM-dd")
+    &amp;dateTo=@DateTime.UtcNow.ToString("yyyy-MM-dd")
+    &amp;user=keeper@@zoostav.ru
+    &amp;search=вакцин
+    &amp;sort=date_desc&amp;page=1&amp;pageSize=20</pre>
+                <a class="btn btn-outline btn-block" href="/swagger" target="_blank">Swagger UI →</a>
+            </section>
+
+            <section class="zoo-card">
+                <h2>Лента добавления</h2>
+                <p class="zoo-muted small">Последние внесённые записи (в т.ч. через API):</p>
+                <ul class="zoo-feed" id="liveFeed">
+                    @foreach (var item in Model.Feed)
+                    {
+                        <li>
+                            <span class="zoo-tag zoo-tag--sm">@item.Type.Icon() @item.Type.Title()</span>
+                            <a asp-action="Details" asp-route-id="@item.Id">@item.Title</a>
+                            <small>@item.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm") · @item.CreatedVia</small>
+                        </li>
+                    }
+                </ul>
+                <span class="zoo-muted small" id="liveStatus">Живые обновления: ожидание…</span>
+            </section>
+        </aside>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Подписка на уведомления SignalR: новые записи дневника появляются без перезагрузки страницы.
+        window.zooLive = { hubUrl: '/hubs/zoo', animalSlug: '@(f.Slug ?? "")' };
+    </script>
+}

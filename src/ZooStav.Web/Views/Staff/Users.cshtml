@@ -1,0 +1,58 @@
+@model List<(ZooUser User, IList<string> Roles)>
+@{
+    ViewData["Title"] = "Пользователи";
+}
+
+<div class="container">
+    <header class="zoo-page-head">
+        <div>
+            <h1>Пользователи и роли</h1>
+            <p class="zoo-muted">
+                Раздел доступен только роли <code>Staff</code>. Здесь можно назначить пользователю роль
+                работника зоопарка (<code>Staff</code>) — после этого ему станут доступны ведение дневника
+                и API-методы записи.
+            </p>
+        </div>
+    </header>
+
+    <div class="zoo-table-wrap">
+        <table class="zoo-table">
+            <thead>
+            <tr>
+                <th>E-mail</th>
+                <th>Имя</th>
+                <th>Роли</th>
+                <th>Зарегистрирован</th>
+                <th>Назначить роль</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var (user, roles) in Model)
+            {
+                <tr>
+                    <td><code>@user.Email</code></td>
+                    <td>@user.FullName</td>
+                    <td>
+                        @foreach (var role in roles)
+                        {
+                            <span class="zoo-badge @(role == ZooRoles.Staff ? "zoo-badge--staff" : "zoo-badge--visitor")">@role</span>
+                        }
+                    </td>
+                    <td>@user.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy")</td>
+                    <td>
+                        <form asp-action="ChangeRole" asp-route-id="@user.Id" method="post" class="zoo-role-form">
+                            <select name="role">
+                                @foreach (var role in ZooRoles.All)
+                                {
+                                    <option value="@role" selected="@(roles.Contains(role))">@role</option>
+                                }
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-accent">Сохранить</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

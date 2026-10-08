@@ -1,0 +1,40 @@
+@model AccessDeniedViewModel
+@{
+    ViewData["Title"] = "Доступ запрещён";
+}
+
+<div class="container">
+    <section class="zoo-card zoo-denied">
+        <div class="zoo-denied__icon">🔒</div>
+        <h1>Доступ запрещён</h1>
+
+        @if (Model.IsAnonymous)
+        {
+            <p class="zoo-lead">
+                Для выполнения этого действия нужно войти в систему.
+                Ведение дневника доступно работникам зоопарка (роль <code>Staff</code>).
+            </p>
+            <div class="zoo-denied__actions">
+                <a class="btn btn-accent btn-lg" asp-controller="Account" asp-action="Login">Войти</a>
+                <a class="btn btn-outline btn-lg" asp-controller="Account" asp-action="Register">Регистрация</a>
+                <a class="btn btn-outline btn-lg" href="https://zoostav.ru" target="_blank" rel="noopener">Сайт зоопарка ↗</a>
+            </div>
+        }
+        else
+        {
+            <p class="zoo-lead">
+                У вашей учётной записи нет прав на это действие.
+                Запись в дневник наблюдений разрешена только роли <code>Staff</code> (работник зоопарка).
+            </p>
+            <div class="zoo-denied__actions">
+                <a class="btn btn-accent btn-lg" asp-controller="Diary" asp-action="Index">Перейти к дневнику (просмотр)</a>
+                <a class="btn btn-outline btn-lg" asp-controller="Account" asp-action="Profile">Мой профиль</a>
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.ReturnUrl))
+        {
+            <p class="zoo-muted small">Запрошенный адрес: <code>@Model.ReturnUrl</code></p>
+        }
+    </section>
+</div>

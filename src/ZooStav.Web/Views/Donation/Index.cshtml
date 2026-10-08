@@ -1,0 +1,58 @@
+@model List<Donation>
+@{
+    ViewData["Title"] = "Донаты";
+    decimal total = ViewBag.Total is decimal t ? t : 0m;
+}
+
+<div class="container">
+    <header class="zoo-page-head">
+        <div>
+            <h1>Донаты зоопарку</h1>
+            <p class="zoo-muted">
+                Публичная отчётность: всего собрано <strong>@total.ToString("N0") ₽</strong>
+                (показаны последние @Model.Count записей). Спасибо каждому, кто помогает животным!
+            </p>
+        </div>
+        <div class="zoo-page-head__actions">
+            <a class="btn btn-accent" asp-action="Create">Сделать донат</a>
+        </div>
+    </header>
+
+    <div class="zoo-table-wrap">
+        <table class="zoo-table">
+            <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Донатор</th>
+                <th>Животное</th>
+                <th>Назначение</th>
+                <th>Сумма</th>
+                <th>Сообщение</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var d in Model)
+            {
+                <tr>
+                    <td>@d.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@d.DonorName</td>
+                    <td>
+                        @if (d.Animal is not null)
+                        {
+                            <a asp-controller="Animal" asp-action="Page" asp-route-slug="@d.Animal.Slug">@d.Animal.Name</a>
+                        }
+                    </td>
+                    <td>@DonationPurposes.Title(d.Purpose)</td>
+                    <td><strong>@d.Amount.ToString("N0") ₽</strong></td>
+                    <td class="zoo-muted">@d.Message</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="zoo-card zoo-empty"><p>Пока нет ни одного доната. Станьте первым!</p></div>
+    }
+</div>

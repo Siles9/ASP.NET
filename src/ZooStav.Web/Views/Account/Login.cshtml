@@ -1,0 +1,69 @@
+@model LoginViewModel
+@using Microsoft.Extensions.Options
+@inject IOptions<ZooOptions> ZooConfig
+@{
+    ViewData["Title"] = "Вход";
+    var zoo = ZooConfig.Value;
+}
+
+<div class="container">
+    <div class="zoo-auth-wrap">
+        <section class="zoo-card zoo-form-card">
+            <h1>Вход в личный кабинет</h1>
+            <p class="zoo-muted">
+                Посетитель видит информацию о животных и дневник наблюдений.
+                Работник зоопарка (роль <code>Staff</code>) дополнительно ведёт дневник.
+            </p>
+
+            <form asp-action="Login" method="post" class="zoo-form">
+                <input type="hidden" asp-for="ReturnUrl"/>
+                <input type="hidden" asp-for="AnimalHost"/>
+                <div asp-validation-summary="All" class="zoo-validation"></div>
+
+                <label>
+                    <span>E-mail</span>
+                    <input asp-for="Email" type="email" autocomplete="username" placeholder="keeper@zoostav.ru"/>
+                    <span asp-validation-for="Email"></span>
+                </label>
+
+                <label>
+                    <span>Пароль</span>
+                    <input asp-for="Password" type="password" autocomplete="current-password"/>
+                    <span asp-validation-for="Password"></span>
+                </label>
+
+                <label class="zoo-checkbox">
+                    <input asp-for="RememberMe" type="checkbox"/>
+                    <span>Запомнить меня</span>
+                </label>
+
+                <div class="zoo-form__actions">
+                    <button type="submit" class="btn btn-accent btn-lg">Войти</button>
+                    <a class="btn btn-outline btn-lg" asp-action="Register">Регистрация</a>
+                </div>
+            </form>
+
+            <div class="zoo-demo-credentials">
+                <h3>Тестовые доступы</h3>
+                <ul class="zoo-kv zoo-kv--narrow">
+                    <li><span>Работник зоопарка (Staff)</span><code>keeper@zoostav.ru / Keeper#2026</code></li>
+                    <li><span>Посетитель (Visitor)</span><code>visitor@zoostav.ru / Visitor#2026</code></li>
+                </ul>
+                <a class="btn btn-outline btn-block" asp-action="Demo">Подробнее о демо-доступах →</a>
+            </div>
+        </section>
+
+        <aside class="zoo-card zoo-auth-aside">
+            <h2>Об этом приложении</h2>
+            <p>
+                Страница животного зоопарка на поддомене <code>raccoon.@zoo.RootDomain</code>.
+                Главная страница зоопарка — <a href="@zoo.MainSiteUrl" target="_blank" rel="noopener">@zoo.MainSiteUrl</a>.
+            </p>
+            <ul class="zoo-list">
+                <li>Аутентификация: cookie для сайта и JWT для API</li>
+                <li>Авторизация по ролям: Visitor и Staff</li>
+                <li>Дневник наблюдений с фильтрацией по дате, типу и автору</li>
+            </ul>
+        </aside>
+    </div>
+</div>

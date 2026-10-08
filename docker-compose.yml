@@ -1,0 +1,40 @@
+# Демонстрационный запуск: приложение + SQL Server.
+#   docker compose up --build
+# Приложение будет доступно на http://localhost:8080 (страница животного — /raccoon),
+# Swagger — http://localhost:8080/swagger
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: zoostav-mssql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "ZooStav#2026"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'ZooStav#2026' -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  web:
+    build: .
+    container_name: zoostav-web
+    depends_on:
+      mssql:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      Database__Provider: SqlServer
+      Database__FailFast: "true"
+      ConnectionStrings__SqlServer: "Server=mssql,1433;Database=ZooStavRaccoon;User Id=sa;Password=ZooStav#2026;TrustServerCertificate=True;MultipleActiveResultSets=true"
+      Zoo__RootDomain: zoostav.ru
+      Zoo__MainSiteUrl: https://zoostav.ru
+      Zoo__UseHttpsRedirection: "false"
+    ports:
+      - "8080:8080"
+
+volumes:
+  mssql-data:

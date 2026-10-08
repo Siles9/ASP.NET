@@ -1,0 +1,311 @@
+@model AnimalPageViewModel
+@using Microsoft.Extensions.Options
+@inject IOptions<ZooOptions> ZooConfig
+@inject ZooSubdomain Subdomains
+@{
+    ViewData["Title"] = Model.Animal.Name;
+    var a = Model.Animal;
+    var zoo = ZooConfig.Value;
+    var isStaff = User.IsInRole(ZooRoles.Staff);
+    var isAuth = User.Identity?.IsAuthenticated == true;
+
+    string Age()
+    {
+        if (a.BirthDate is null) return "—";
+        var days = (DateTime.UtcNow - a.BirthDate.Value.ToDateTime(TimeOnly.MinValue)).TotalDays;
+        var years = (int)(days / 365.25);
+        var months = (int)((days - years * 365.25) / 30.44);
+        if (years == 0) return months + " мес.";
+        return months > 0 ? $"{years} г. {months} мес." : $"{years} лет";
+    }
+}
+
+<section class="animal-hero" style="--hero-image:url('@(Model.Photos.FirstOrDefault()?.Url ?? "/images/placeholder.svg")')">
+    <div class="animal-hero__overlay">
+        <div class="container">
+            <div class="animal-hero__breadcrumbs">
+                <a href="@zoo.MainSiteUrl" target="_blank" rel="noopener">zoostav.ru</a>
+                <span>/</span>
+                <a asp-controller="Animal" asp-action="Index">Животные</a>
+                <span>/</span>
+                <span>@a.Name</span>
+            </div>
+
+            <h1 class="animal-hero__title">@a.Name</h1>
+            <p class="animal-hero__latin"><em>@a.LatinName</em></p>
+
+            <div class="animal-hero__badges">
+                <span class="zoo-chip">@a.Gender</span>
+                <span class="zoo-chip">Возраст: @Age()</span>
+                <span class="zoo-chip zoo-chip--ok">@a.Status</span>
+                <span class="zoo-chip">@a.Enclosure</span>
+            </div>
+
+            <div class="animal-hero__actions">
+                <a class="btn btn-accent btn-lg" asp-controller="Donation" asp-action="Create" asp-route-slug="@a.Slug">
+                    ❤ Покормить / поддержать
+                </a>
+                <a class="btn btn-light btn-lg" href="#webcam">📹 Веб-камера</a>
+                <a class="btn btn-outline-light btn-lg" asp-controller="Diary" asp-action="Index">
+                    📖 Дневник наблюдений (@Model.DiaryEntriesCount)
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container animal-body">
+
+    @* Обязательная ссылка на главную страницу зоопарка *@
+    <div class="zoo-callout">
+        <div>
+            <strong>Это персональная страница особи зоопарка.</strong>
+            Адрес страницы: <code>@Model.PublicUrl</code>
+        </div>
+        <a class="btn btn-accent" href="@zoo.MainSiteUrl" target="_blank" rel="noopener">
+            Перейти на главную страницу зоопарка — @zoo.MainSiteUrl ↗
+        </a>
+    </div>
+
+    <div class="animal-grid">
+        <div class="animal-main">
+
+            <section class="zoo-card" id="about">
+                <h2>Кто это</h2>
+                <p class="zoo-lead">@a.Summary</p>
+
+                <div class="zoo-facts">
+                    <div><span>Вид</span><strong>@a.Species</strong></div>
+                    <div><span>Латинское название</span><strong><em>@a.LatinName</em></strong></div>
+                    <div><span>Пол</span><strong>@a.Gender</strong></div>
+                    <div><span>Дата рождения</span><strong>@(a.BirthDate?.ToString("dd.MM.yyyy") ?? "—")</strong></div>
+                    <div><span>Возраст</span><strong>@Age()</strong></div>
+                    <div><span>Вольер</span><strong>@a.Enclosure</strong></div>
+                </div>
+            </section>
+
+            <section class="zoo-card" id="history">
+                <h2>История особи</h2>
+                <p>@a.History</p>
+                <div class="zoo-two-col">
+                    <div>
+                        <h3>🌍 Природный ареал и образ жизни</h3>
+                        <p>@a.Habitat</p>
+                    </div>
+                    <div>
+                        <h3>🍽 Рацион</h3>
+                        <p>@a.Diet</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="zoo-card" id="photos">
+                <h2>Фотогалерея</h2>
+                @if (Model.Photos.Any())
+                {
+                    <div class="zoo-gallery">
+                        @foreach (var photo in Model.Photos)
+                        {
+                            <figure class="zoo-gallery__item">
+                                <img src="@photo.Url" alt="@photo.Title" loading="lazy"/>
+                                <figcaption>@photo.Title</figcaption>
+                            </figure>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="zoo-muted">Фотографии пока не загружены.</p>
+                }
+            </section>
+
+            <section class="zoo-card" id="video">
+                <h2>Видео</h2>
+                @if (Model.Videos.Any())
+                {
+                    <div class="zoo-video-grid">
+                        @foreach (var video in Model.Videos)
+                        {
+                            <div class="zoo-video">
+                                <div class="zoo-video__frame">
+                                    @if (video.Url.Contains("youtube", StringComparison.OrdinalIgnoreCase) ||
+                                         video.Url.Contains("rutube", StringComparison.OrdinalIgnoreCase) ||
+                                         video.Url.Contains("vk.com", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <iframe src="@video.Url" title="@video.Title" allowfullscreen
+                                                loading="lazy" allow="accelerometer; autoplay; encrypted-media; picture-in-picture"></iframe>
+                                    }
+                                    else
+                                    {
+                                        <video controls preload="metadata" poster="@video.PosterUrl">
+                                            <source src="@video.Url"/>
+                                            Ваш браузер не поддерживает видео.
+                                        </video>
+                                    }
+                                </div>
+                                <p class="zoo-video__title">@video.Title</p>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="zoo-muted">Видеоматериалы пока не опубликованы.</p>
+                }
+            </section>
+
+            <section class="zoo-card" id="webcam">
+                <h2>Наблюдение через веб-камеру</h2>
+                <p class="zoo-muted">
+                    Онлайн-трансляция из вольера №7 «Лесная тропа». Камера работает ежедневно с 09:00 до 20:00.
+                    Если трансляция недоступна, вы видите актуальный стоп-кадр из вольера.
+                </p>
+
+                <div class="zoo-webcam">
+                    @if (!string.IsNullOrWhiteSpace(a.WebcamUrl))
+                    {
+                        <div class="zoo-webcam__live">
+                            <iframe src="@a.WebcamUrl" title="Веб-камера вольера @a.Name" allowfullscreen loading="lazy"></iframe>
+                        </div>
+                    }
+                    <figure class="zoo-webcam__snapshot">
+                        <img src="/images/raccoon/raccoon-enclosure.jpg" alt="Стоп-кадр из вольера @a.Name"/>
+                        <figcaption>Стоп-кадр: вольер №7, обновляется каждые 5 минут</figcaption>
+                    </figure>
+                </div>
+
+                <p class="zoo-muted zoo-webcam__fallback">
+                    Адрес трансляции: <code>@(string.IsNullOrWhiteSpace(a.WebcamUrl) ? "—" : a.WebcamUrl)</code>
+                    (задаётся в БД в поле <code>Animal.WebcamUrl</code>; для реального вольера подставляется адрес RTSP→HLS/WebRTC-шлюза).
+                </p>
+            </section>
+
+            <section class="zoo-card" id="diary">
+                <div class="zoo-card__head">
+                    <h2>Последние записи дневника</h2>
+                    <a class="btn btn-outline" asp-controller="Diary" asp-action="Index">
+                        Все записи (@Model.DiaryEntriesCount) →
+                    </a>
+                </div>
+
+                @if (Model.RecentDiary.Any())
+                {
+                    <ul class="zoo-timeline" id="diaryTimeline">
+                        @foreach (var entry in Model.RecentDiary)
+                        {
+                            <li class="zoo-timeline__item @entry.Type.CssClass()">
+                                <div class="zoo-timeline__icon">@entry.Type.Icon()</div>
+                                <div class="zoo-timeline__body">
+                                    <div class="zoo-timeline__meta">
+                                        <span class="zoo-tag">@entry.Type.Title()</span>
+                                        <time>@entry.OccurredAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</time>
+                                        <span class="zoo-muted">· @entry.PerformedBy</span>
+                                    </div>
+                                    <a class="zoo-timeline__title" asp-controller="Diary" asp-action="Details" asp-route-id="@entry.Id">
+                                        @entry.Title
+                                    </a>
+                                    <p class="zoo-timeline__text">@entry.Description</p>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="zoo-muted">Записей пока нет.</p>
+                }
+
+                <div class="zoo-diary-cta">
+                    @if (isStaff)
+                    {
+                        <a class="btn btn-accent" asp-controller="Diary" asp-action="Create" asp-route-animalId="@a.Id">
+                            ✚ Добавить запись в дневник
+                        </a>
+                        <span class="zoo-muted">Вы вошли как работник зоопарка — доступна запись в дневник.</span>
+                    }
+                    else if (isAuth)
+                    {
+                        <span class="zoo-muted">
+                            Просмотр дневника доступен вам как авторизованному пользователю.
+                            Ведение записей — только для работников зоопарка (роль <code>Staff</code>).
+                        </span>
+                    }
+                    else
+                    {
+                        <a class="btn btn-outline" asp-controller="Account" asp-action="Login">Войти для доступа к дневнику</a>
+                        <span class="zoo-muted">Текстовое описание, фото, видео, веб-камера и донаты доступны без регистрации.</span>
+                    }
+                </div>
+            </section>
+        </div>
+
+        <aside class="animal-side">
+            <section class="zoo-card zoo-donate-card" id="donate">
+                <h2>❤ Донат на корм и лечение</h2>
+                <p class="zoo-muted">Собранные средства идут на рыбу, творог, витамины и ветеринарный уход.</p>
+
+                <div class="zoo-progress">
+                    <div class="zoo-progress__bar" style="width:@(Math.Min(100, (int)(Model.DonationsTotal / 30000m * 100)))%"></div>
+                </div>
+                <p class="zoo-progress__caption">
+                    Собрано <strong>@Model.DonationsTotal.ToString("N0") ₽</strong> из 30 000 ₽ ·
+                    донатов: @Model.DonationsCount
+                </p>
+
+                <a class="btn btn-accent btn-block" asp-controller="Donation" asp-action="Create" asp-route-slug="@a.Slug">
+                    Сделать донат
+                </a>
+
+                @if (Model.RecentDonations.Any())
+                {
+                    <ul class="zoo-donors">
+                        @foreach (var d in Model.RecentDonations)
+                        {
+                            <li>
+                                <strong>@d.DonorName</strong>
+                                <span>@d.Amount.ToString("N0") ₽</span>
+                                <small>@DonationPurposes.Title(d.Purpose) · @d.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy")</small>
+                            </li>
+                        }
+                    </ul>
+                }
+            </section>
+
+            <section class="zoo-card">
+                <h2>Дневник: структура записей</h2>
+                <ul class="zoo-legend">
+                    @foreach (var type in Enum.GetValues<DiaryEntryType>())
+                    {
+                        <li><span>@type.Icon()</span> @type.Title()</li>
+                    }
+                </ul>
+                <p class="zoo-muted small">
+                    Фильтрация по дате, типу и автору записи — на странице дневника.
+                </p>
+            </section>
+
+            <section class="zoo-card">
+                <h2>API</h2>
+                <p class="zoo-muted small">Данные этой страницы доступны через REST API:</p>
+                <ul class="zoo-api-list">
+                    <li><code>GET /api/animals/@a.Slug</code></li>
+                    <li><code>GET /api/animals/@a.Slug/media</code></li>
+                    <li><code>GET /api/donations/@a.Slug/summary</code></li>
+                    <li><code>GET /api/animals/@a.Slug/diary</code></li>
+                    <li><code>POST /api/animals/@a.Slug/diary</code> <span class="zoo-muted">(Staff)</span></li>
+                </ul>
+                <a class="btn btn-outline btn-block" href="/swagger" target="_blank">Swagger UI →</a>
+            </section>
+
+            <section class="zoo-card">
+                <h2>Как добраться</h2>
+                <p class="zoo-muted small">
+                    Ставрополь, Парк Победы. Вольер №7 «Лесная тропа» — в контактной зоне, справа от центрального входа.
+                </p>
+                <a class="btn btn-outline btn-block" href="@zoo.MainSiteUrl" target="_blank" rel="noopener">
+                    Сайт зоопарка: zoostav.ru
+                </a>
+            </section>
+        </aside>
+    </div>
+</div>

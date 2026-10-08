@@ -1,0 +1,146 @@
+@model AnimalListViewModel
+@using Microsoft.Extensions.Options
+@inject IOptions<ZooOptions> ZooConfig
+@{
+    ViewData["Title"] = "Главная";
+    var zoo = ZooConfig.Value;
+    var stats = ViewBag.Stats as dynamic;
+    var isAuth = User.Identity?.IsAuthenticated == true;
+    var isStaff = User.IsInRole(ZooRoles.Staff);
+}
+
+<section class="zoo-hero">
+    <div class="container">
+        <div class="zoo-hero__content">
+            <p class="zoo-hero__eyebrow">Зоопарк в Парке Победы · Ставрополь</p>
+            <h1>Зоопарк, где у каждого животного есть имя и своя история</h1>
+            <p class="zoo-hero__lead">
+                Более 100 животных, контактная зона, веб-камеры в вольерах и открытый дневник наблюдений,
+                который ведут сотрудники зоопарка. Вариант проекта — <strong>Енот-полоскун</strong>.
+            </p>
+            <div class="zoo-hero__actions">
+                <a class="btn btn-accent btn-lg" asp-controller="Animal" asp-action="Index">Смотреть животных</a>
+                <a class="btn btn-light btn-lg" asp-controller="Diary" asp-action="Index">Дневник наблюдений</a>
+                <a class="btn btn-outline-light btn-lg" href="@zoo.MainSiteUrl" target="_blank" rel="noopener">
+                    Сайт зоопарка: zoostav.ru ↗
+                </a>
+            </div>
+            @if (!isAuth)
+            {
+                <p class="zoo-hero__hint">
+                    Информация, фото, видео и веб-камера доступны без регистрации.
+                    <a asp-controller="Account" asp-action="Login">Вход</a> ·
+                    <a asp-controller="Account" asp-action="Register">Регистрация</a>
+                </p>
+            }
+            else if (isStaff)
+            {
+                <p class="zoo-hero__hint">
+                    Вы вошли как работник зоопарка — доступно ведение дневника наблюдений.
+                    <a asp-controller="Diary" asp-action="Create">Добавить запись</a>
+                </p>
+            }
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <section class="zoo-stats">
+        <div><strong>@(stats?.Animals ?? 1)</strong><span>особей в базе проекта</span></div>
+        <div><strong>40+</strong><span>видов животных</span></div>
+        <div><strong>@(stats?.DiaryEntries ?? 0)</strong><span>записей дневника</span></div>
+        <div><strong>@(stats?.Media ?? 0)</strong><span>фото и видео</span></div>
+    </section>
+
+    <section class="zoo-section">
+        <div class="zoo-section__head">
+            <h2>Наши животные</h2>
+            <p class="zoo-muted">
+                У каждой особи — персональная страница на своём поддомене:
+                <code>@(Model.Animals.FirstOrDefault()?.Animal.Slug ?? "raccoon").@zoo.RootDomain</code>
+            </p>
+        </div>
+
+        <div class="zoo-cards">
+            @foreach (var card in Model.Animals)
+            {
+                <article class="zoo-animal-card">
+                    <a class="zoo-animal-card__image" href="@card.PublicUrl">
+                        <img src="@card.PhotoUrl" alt="@card.Animal.Name" loading="lazy"/>
+                        <span class="zoo-animal-card__badge">@card.Animal.Status</span>
+                    </a>
+                    <div class="zoo-animal-card__body">
+                        <h3>@card.Animal.Name</h3>
+                        <p class="zoo-muted"><em>@card.Animal.LatinName</em></p>
+                        <p>@(card.Animal.Summary.Length > 160 ? card.Animal.Summary[..160] + "…" : card.Animal.Summary)</p>
+                        <div class="zoo-animal-card__meta">
+                            <span>📖 @card.DiaryEntriesCount записей</span>
+                            <span>📍 @card.Animal.Enclosure</span>
+                        </div>
+                        <div class="zoo-animal-card__actions">
+                            <a class="btn btn-accent" href="@card.PublicUrl">Открыть страницу</a>
+                            <a class="btn btn-outline" asp-controller="Animal" asp-action="Page" asp-route-slug="@card.Animal.Slug">
+                                На этом домене
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            }
+        </div>
+    </section>
+
+    <section class="zoo-section zoo-section--split">
+        <div class="zoo-card">
+            <h2>Поддомен животного</h2>
+            <p>
+                По заданию страница животного расположена на поддомене сайта зоопарка:
+                корневой домен — <code>@zoo.RootDomain</code>, страница енота — <code>raccoon.@zoo.RootDomain</code>.
+            </p>
+            <ul class="zoo-list">
+                <li><code>@zoo.MainSiteUrl</code> — главная страница зоопарка (внешний сайт)</li>
+                <li><code>https://@(Model.Animals.FirstOrDefault()?.Animal.Slug ?? "raccoon").@zoo.RootDomain/</code> — страница животного</li>
+                <li>Ссылка на главную зоопарка есть в шапке, на странице животного и в подвале сайта</li>
+            </ul>
+            <a class="btn btn-outline" asp-controller="Animal" asp-action="Routing">Как настроен роутинг →</a>
+        </div>
+
+        <div class="zoo-card">
+            <h2>Роли и доступ</h2>
+            <div class="zoo-roles">
+                <div class="zoo-role zoo-role--visitor">
+                    <h3>Посетитель <span class="zoo-badge zoo-badge--visitor">Visitor</span></h3>
+                    <ul>
+                        <li>текстовое описание и история особи</li>
+                        <li>фото- и видеогалерея</li>
+                        <li>наблюдение через веб-камеру</li>
+                        <li>донат на корм/лечение</li>
+                        <li>просмотр дневника наблюдений</li>
+                    </ul>
+                </div>
+                <div class="zoo-role zoo-role--staff">
+                    <h3>Работник зоопарка <span class="zoo-badge zoo-badge--staff">Staff</span></h3>
+                    <ul>
+                        <li>всё, что доступно посетителю</li>
+                        <li>ведение дневника: кормёжка, вакцинация, спаривание, потомство, болезни, лечение</li>
+                        <li>редактирование и удаление записей</li>
+                        <li>журнал действий и управление пользователями</li>
+                    </ul>
+                </div>
+            </div>
+            <a class="btn btn-outline" asp-controller="Account" asp-action="Demo">Тестовые логины для проверки →</a>
+        </div>
+    </section>
+
+    <section class="zoo-section">
+        <div class="zoo-cta-band">
+            <div>
+                <h2>Донат — это рыба, витамины и забота</h2>
+                <p>Поддержите содержание и лечение животных зоопарка. Даже небольшой вклад важен.</p>
+            </div>
+            <div class="zoo-cta-band__actions">
+                <a class="btn btn-accent btn-lg" asp-controller="Donation" asp-action="Create">Сделать донат</a>
+                <a class="btn btn-outline-light btn-lg" asp-controller="Donation" asp-action="Index">Все донаты</a>
+            </div>
+        </div>
+    </section>
+</div>

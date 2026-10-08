@@ -1,0 +1,37 @@
+@model Donation
+@{
+    ViewData["Title"] = "Спасибо за донат";
+}
+
+<div class="container">
+    <section class="zoo-thanks">
+        <div class="zoo-thanks__icon">❤</div>
+        <h1>Спасибо, @Model.DonorName!</h1>
+        <p class="zoo-lead">
+            Донат на сумму <strong>@Model.Amount.ToString("N0") ₽</strong>
+            (назначение: <strong>@DonationPurposes.Title(Model.Purpose)</strong>)
+            принят и направлен на содержание животного «@Model.Animal?.Name».
+        </p>
+
+        <ul class="zoo-kv zoo-kv--narrow">
+            <li><span>Номер операции</span><code>@Model.PaymentReference</code></li>
+            <li><span>Дата</span><code>@Model.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</code></li>
+            <li><span>Статус</span><code>@Model.Status</code></li>
+            @if (!string.IsNullOrWhiteSpace(Model.Message))
+            {
+                <li><span>Сообщение</span><em>«@Model.Message»</em></li>
+            }
+        </ul>
+
+        <div class="zoo-thanks__actions">
+            @if (Model.Animal is not null)
+            {
+                <a class="btn btn-accent btn-lg" asp-controller="Animal" asp-action="Page" asp-route-slug="@Model.Animal.Slug">
+                    На страницу животного
+                </a>
+            }
+            <a class="btn btn-outline btn-lg" asp-controller="Donation" asp-action="Index">Все донаты</a>
+            <a class="btn btn-outline btn-lg" href="https://zoostav.ru" target="_blank" rel="noopener">Сайт зоопарка ↗</a>
+        </div>
+    </section>
+</div>

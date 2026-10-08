@@ -1,0 +1,75 @@
+@model DiaryCreateViewModel
+@{
+    var isEdit = ViewContext.RouteData.Values["action"]?.ToString() == "Edit" ||
+                 Context.Request.Path.Value?.Contains("/edit/", StringComparison.OrdinalIgnoreCase) == true;
+    ViewData["Title"] = isEdit ? "Изменение записи дневника" : "Новая запись дневника";
+}
+
+<div class="container">
+    <header class="zoo-page-head">
+        <div>
+            <h1>@ViewData["Title"]</h1>
+            <p class="zoo-muted">
+                Запись доступна только работникам зоопарка (роль <code>Staff</code>).
+                Типы записей: кормление, вакцинация, спаривание, потомство, болезнь, лечение, измерения, перемещение, наблюдение.
+            </p>
+        </div>
+    </header>
+
+    <section class="zoo-card zoo-form-card">
+        <form asp-action="@(isEdit ? "Edit" : "Create")" method="post" class="zoo-form">
+            <div asp-validation-summary="All" class="zoo-validation"></div>
+
+            <div class="zoo-form__grid">
+                <label>
+                    <span>Животное</span>
+                    <select asp-for="AnimalId" asp-items="@(new SelectList(Model.Animals, "Id", "Name"))"></select>
+                    <span asp-validation-for="AnimalId"></span>
+                </label>
+
+                <label>
+                    <span>Тип записи</span>
+                    <select asp-for="Type">
+                        @foreach (var type in Enum.GetValues<DiaryEntryType>())
+                        {
+                            <option value="@type" selected="@(Model.Type == type)">@type.Icon() @type.Title()</option>
+                        }
+                    </select>
+                    <span asp-validation-for="Type"></span>
+                </label>
+
+                <label>
+                    <span>Дата и время события</span>
+                    <input asp-for="OccurredAt" type="datetime-local" value="@Model.OccurredAt.ToString("yyyy-MM-ddTHH:mm")"/>
+                    <span asp-validation-for="OccurredAt"></span>
+                </label>
+
+                <label>
+                    <span>Место</span>
+                    <input asp-for="Location" placeholder="Вольер №7, ветеринарный блок…"/>
+                </label>
+
+                <label class="zoo-form__wide">
+                    <span>Заголовок</span>
+                    <input asp-for="Title" placeholder="Например: Утреннее кормление"/>
+                    <span asp-validation-for="Title"></span>
+                </label>
+
+                <label class="zoo-form__wide">
+                    <span>Кто выполнил</span>
+                    <input asp-for="PerformedBy"/>
+                </label>
+
+                <label class="zoo-form__wide">
+                    <span>Описание (рацион, дозировка, наблюдения)</span>
+                    <textarea asp-for="Description" rows="5" placeholder="Подробности: состав рациона, препарат и доза, поведение животного…"></textarea>
+                </label>
+            </div>
+
+            <div class="zoo-form__actions">
+                <button type="submit" class="btn btn-accent btn-lg">@(isEdit ? "Сохранить изменения" : "Добавить запись")</button>
+                <a class="btn btn-outline btn-lg" asp-action="Index">Отмена</a>
+            </div>
+        </form>
+    </section>
+</div>

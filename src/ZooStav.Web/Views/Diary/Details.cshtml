@@ -1,0 +1,51 @@
+@model DiaryEntry
+@{
+    ViewData["Title"] = "Запись дневника";
+    var isStaff = (bool)(ViewBag.IsStaff ?? false);
+}
+
+<div class="container">
+    <header class="zoo-page-head">
+        <div>
+            <p class="zoo-muted">
+                <a asp-action="Index" asp-route-slug="@Model.Animal?.Slug">← Все записи дневника</a>
+            </p>
+            <h1>@Model.Title</h1>
+            <p class="zoo-muted">
+                <span class="zoo-tag @Model.Type.CssClass()">@Model.Type.Icon() @Model.Type.Title()</span>
+                <time>@Model.OccurredAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</time>
+            </p>
+        </div>
+        @if (isStaff)
+        {
+            <div class="zoo-page-head__actions">
+                <a class="btn btn-outline" asp-action="Edit" asp-route-id="@Model.Id">Изменить</a>
+                <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline"
+                      onsubmit="return confirm('Удалить запись?');">
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
+        }
+    </header>
+
+    <section class="zoo-card">
+        <p class="zoo-lead">@Model.Description</p>
+
+        <ul class="zoo-kv">
+            <li><span>Животное</span>
+                @if (Model.Animal is not null)
+                {
+                    <a asp-controller="Animal" asp-action="Page" asp-route-slug="@Model.Animal.Slug">@Model.Animal.Name</a>
+                }
+            </li>
+            <li><span>Тип записи</span><code>@Model.Type (@((int)Model.Type))</code></li>
+            <li><span>Дата и время события</span><code>@Model.OccurredAtUtc.ToString("yyyy-MM-dd HH:mm") UTC</code></li>
+            <li><span>Кто выполнил</span><span>@Model.PerformedBy</span></li>
+            <li><span>Место</span><span>@Model.Location</span></li>
+            <li><span>Автор записи</span><code>@(Model.User?.UserName ?? "—")</code></li>
+            <li><span>Источник</span><code>@Model.CreatedVia</code></li>
+            <li><span>Создано</span><code>@Model.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</code></li>
+            <li><span>API</span><code>GET /api/diary/@Model.Id</code></li>
+        </ul>
+    </section>
+</div>

@@ -1,0 +1,85 @@
+@model ZooUser
+@{
+    ViewData["Title"] = "Профиль";
+    var roles = ViewBag.Roles as IList<string> ?? new List<string>();
+}
+
+<div class="container">
+    <header class="zoo-page-head">
+        <div>
+            <h1>@Model.FullName</h1>
+            <p class="zoo-muted">Учётная запись зоопарка · <code>@Model.Email</code></p>
+        </div>
+        <div class="zoo-page-head__actions">
+            @if (User.IsInRole(ZooRoles.Staff))
+            {
+                <a class="btn btn-accent" asp-controller="Diary" asp-action="Create">✚ Новая запись дневника</a>
+            }
+        </div>
+    </header>
+
+    <div class="zoo-section zoo-section--split">
+        <section class="zoo-card">
+            <h2>Данные учётной записи</h2>
+            <ul class="zoo-kv">
+                <li><span>Идентификатор</span><code>@Model.Id</code></li>
+                <li><span>Имя</span><span>@Model.FullName</span></li>
+                <li><span>E-mail</span><span>@Model.Email</span></li>
+                <li><span>Роли</span>
+                    <span>
+                        @foreach (var role in roles)
+                        {
+                            <span class="zoo-badge @(role == ZooRoles.Staff ? "zoo-badge--staff" : "zoo-badge--visitor")">@role</span>
+                        }
+                    </span>
+                </li>
+                <li><span>Зарегистрирован</span><code>@Model.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</code></li>
+            </ul>
+
+            <form asp-action="Logout" method="post">
+                <button type="submit" class="btn btn-outline">Выйти из системы</button>
+            </form>
+        </section>
+
+        <section class="zoo-card">
+            <h2>Что доступно вашей роли</h2>
+            @if (roles.Contains(ZooRoles.Staff))
+            {
+                <ul class="zoo-list">
+                    <li>ведение дневника наблюдений: кормёжка, вакцинация, спаривание, потомство, болезни, лечение</li>
+                    <li>редактирование и удаление любых записей дневника</li>
+                    <li>журнал действий пользователей и управление ролями</li>
+                    <li>доступ к API-методам записи (<code>POST/PUT/DELETE /api/diary…</code>)</li>
+                </ul>
+                <a class="btn btn-outline" asp-controller="Staff" asp-action="Audit">Журнал действий →</a>
+            }
+            else
+            {
+                <ul class="zoo-list">
+                    <li>просмотр информации о животных: описание, история, фото, видео</li>
+                    <li>наблюдение через веб-камеру вольера</li>
+                    <li>донаты на корм и лечение</li>
+                    <li>просмотр дневника наблюдений</li>
+                </ul>
+                <p class="zoo-muted small">
+                    Для получения роли <code>Staff</code> обратитесь к администрации зоопарка —
+                    роль назначается в разделе «Пользователи» (доступен работникам).
+                </p>
+            }
+        </section>
+    </div>
+
+    <section class="zoo-card">
+        <h2>JWT для работы с API</h2>
+        <p class="zoo-muted">
+            Для внешних клиентов токен выдаётся методом <code>POST /api/auth/login</code>:
+        </p>
+        <pre class="zoo-code">curl -X POST https://raccoon.zoostav.ru/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"keeper@zoostav.ru","password":"Keeper#2026"}'
+
+# ответ содержит accessToken; далее:
+curl https://raccoon.zoostav.ru/api/auth/me -H "Authorization: Bearer &lt;accessToken&gt;"</pre>
+        <a class="btn btn-outline" href="/swagger" target="_blank">Swagger UI →</a>
+    </section>
+</div>

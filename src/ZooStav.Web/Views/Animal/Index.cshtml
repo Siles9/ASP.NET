@@ -1,0 +1,51 @@
+@model AnimalListViewModel
+@using Microsoft.Extensions.Options
+@inject IOptions<ZooOptions> ZooConfig
+@{
+    ViewData["Title"] = "Животные зоопарка";
+    var zoo = ZooConfig.Value;
+}
+
+<div class="container">
+    <header class="zoo-page-head">
+        <h1>Животные зоопарка</h1>
+        <p class="zoo-muted">
+            Всего в базе: @Model.Animals.Count. Персональная страница каждой особи — на отдельном поддомене
+            (<code>*.@zoo.RootDomain</code>). Главная страница зоопарка —
+            <a href="@zoo.MainSiteUrl" target="_blank" rel="noopener">@zoo.MainSiteUrl</a>.
+        </p>
+    </header>
+
+    <div class="zoo-table-wrap">
+        <table class="zoo-table">
+            <thead>
+            <tr>
+                <th>Фото</th>
+                <th>Название</th>
+                <th>Вид / латинское название</th>
+                <th>Вольер</th>
+                <th>Записей дневника</th>
+                <th>Поддомен</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var card in Model.Animals)
+            {
+                <tr>
+                    <td><img class="zoo-thumb" src="@card.PhotoUrl" alt="@card.Animal.Name"/></td>
+                    <td><strong>@card.Animal.Name</strong><br/><span class="zoo-muted">@card.Animal.Gender, @card.Animal.Status</span></td>
+                    <td>@card.Animal.Species<br/><em class="zoo-muted">@card.Animal.LatinName</em></td>
+                    <td>@card.Animal.Enclosure</td>
+                    <td>@card.DiaryEntriesCount</td>
+                    <td><code>@card.Animal.Slug.@zoo.RootDomain</code></td>
+                    <td class="zoo-table__actions">
+                        <a class="btn btn-sm btn-accent" href="@card.PublicUrl">Поддомен ↗</a>
+                        <a class="btn btn-sm btn-outline" asp-action="Page" asp-route-slug="@card.Animal.Slug">Локально</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

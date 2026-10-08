@@ -1,0 +1,139 @@
+@using Microsoft.Extensions.Options
+@using ZooStav.Web.Infrastructure
+@inject IOptions<ZooOptions> ZooConfig
+@inject ZooSubdomain Subdomains
+@{
+    var zoo = ZooConfig.Value;
+    var isAuth = User.Identity?.IsAuthenticated == true;
+    var isStaff = User.IsInRole(ZooRoles.Staff);
+    var host = Context.Request.Host.Host;
+    var subdomain = Subdomains.GetAnimalSlug(host);
+}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>@ViewData["Title"] — Зоопарк в Парке Победы, Ставрополь</title>
+    <meta name="description" content="Страница животного зоопарка в Парке Победы (Ставрополь): описание, фото, видео, веб-камера, дневник наблюдений и донаты."/>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+<header class="zoo-header">
+    <div class="container zoo-header__inner">
+        <a class="zoo-logo" asp-controller="Home" asp-action="Index">
+            <span class="zoo-logo__mark">🦝</span>
+            <span class="zoo-logo__text">
+                <strong>Зоопарк</strong>
+                <small>в Парке Победы · Ставрополь</small>
+            </span>
+        </a>
+
+        <nav class="zoo-nav">
+            <a asp-controller="Home" asp-action="Index">Главная</a>
+            <a asp-controller="Animal" asp-action="Index">Животные</a>
+            <a asp-controller="Diary" asp-action="Index">Дневник</a>
+            <a asp-controller="Donation" asp-action="Index">Донаты</a>
+            <a asp-controller="Home" asp-action="About">О проекте</a>
+            @if (isStaff)
+            {
+                <a asp-controller="Staff" asp-action="Audit">Журнал</a>
+                <a asp-controller="Staff" asp-action="Users">Пользователи</a>
+            }
+        </nav>
+
+        <div class="zoo-header__actions">
+            <a class="btn btn-outline zoo-btn-zoo" href="@zoo.MainSiteUrl" target="_blank" rel="noopener">
+                zoostav.ru&nbsp;↗
+            </a>
+
+            @if (isAuth)
+            {
+                <div class="zoo-user">
+                    <a asp-controller="Account" asp-action="Profile" class="zoo-user__name" title="Профиль">
+                        @(User.FindFirst("fullName")?.Value ?? User.Identity!.Name)
+                        <span class="zoo-badge @(isStaff ? "zoo-badge--staff" : "zoo-badge--visitor")">
+                            @(isStaff ? "Работник" : "Посетитель")
+                        </span>
+                    </a>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-link zoo-logout">Выйти</button>
+                    </form>
+                </div>
+            }
+            else
+            {
+                <a class="btn btn-outline zoo-btn-login" asp-controller="Account" asp-action="Login">Войти</a>
+                <a class="btn btn-accent" asp-controller="Account" asp-action="Register">Регистрация</a>
+            }
+        </div>
+    </div>
+
+    @if (subdomain is not null)
+    {
+        <div class="zoo-subdomain-bar">
+            <div class="container">
+                <span>Вы находитесь на персональной странице животного:</span>
+                <code>@subdomain.@zoo.RootDomain</code>
+                <a href="@zoo.MainSiteUrl" target="_blank" rel="noopener">Главная страница зоопарка →</a>
+            </div>
+        </div>
+    }
+</header>
+
+@if (TempData["Toast"] is string toast && !string.IsNullOrWhiteSpace(toast))
+{
+    <div class="container">
+        <div class="zoo-toast" id="zooToast">@toast</div>
+    </div>
+}
+
+<main>
+    @RenderBody()
+</main>
+
+<footer class="zoo-footer">
+    <div class="container zoo-footer__grid">
+        <div>
+            <h4>Зоопарк в Парке Победы</h4>
+            <p class="zoo-muted">
+                Ставрополь, Парк Победы. Более 100 животных, контактная зона, семейный отдых.
+            </p>
+            <p>
+                <a class="zoo-footer__main-link" href="@zoo.MainSiteUrl" target="_blank" rel="noopener">
+                    @zoo.MainSiteUrl — главная страница зоопарка
+                </a>
+            </p>
+        </div>
+        <div>
+            <h4>Навигация</h4>
+            <ul>
+                <li><a asp-controller="Animal" asp-action="Index">Животные зоопарка</a></li>
+                <li><a asp-controller="Diary" asp-action="Index">Дневник наблюдений</a></li>
+                <li><a asp-controller="Donation" asp-action="Index">Донаты</a></li>
+                <li><a asp-controller="Animal" asp-action="Routing">Роутинг поддомена</a></li>
+                <li><a href="/swagger" target="_blank">REST API (Swagger)</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Учебный проект</h4>
+            <p class="zoo-muted">
+                Вариант «Енот». ASP.NET Core MVC + EF Core + Identity + JWT.
+                Тестовые логины — <a asp-controller="Account" asp-action="Demo">на странице демо-доступа</a>.
+            </p>
+        </div>
+    </div>
+    <div class="container zoo-footer__bottom">
+        <span>© @DateTime.Now.Year Зоопарк в Парке Победы · <a href="@zoo.MainSiteUrl" target="_blank" rel="noopener">zoostav.ru</a></span>
+        <span>Поддомен животного: <code>@(subdomain ?? "raccoon").@zoo.RootDomain</code></span>
+    </div>
+</footer>
+
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/lib/signalr/signalr.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

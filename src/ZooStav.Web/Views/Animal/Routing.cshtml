@@ -1,0 +1,86 @@
+@{
+    ViewData["Title"] = "Роутинг поддомена";
+    var animalUrls = ViewBag.AnimalUrls as IEnumerable<string> ?? Enumerable.Empty<string>();
+    var animalUrlsLocal = ViewBag.AnimalUrlsLocal as IEnumerable<string> ?? Enumerable.Empty<string>();
+}
+
+<div class="container">
+    <header class="zoo-page-head">
+        <h1>Роутинг поддоменов</h1>
+        <p class="zoo-muted">
+            Здесь видно, как приложение определяет животное по имени поддомена. Текущий запрос обработан для хоста
+            <code>@ViewBag.Host</code>.
+        </p>
+    </header>
+
+    <div class="zoo-section zoo-section--split">
+        <section class="zoo-card">
+            <h2>Схема маршрутизации</h2>
+            <table class="zoo-table zoo-table--compact">
+                <tbody>
+                <tr>
+                    <td><code>https://@ViewBag.RootDomain</code></td>
+                    <td>главная страница зоопарка (внешний сайт, на него ведёт обязательная ссылка)</td>
+                </tr>
+                <tr>
+                    <td><code>https://raccoon.@ViewBag.RootDomain/</code></td>
+                    <td>страница животного «raccoon»: middleware переписывает путь <code>/</code> → <code>/animal/raccoon</code></td>
+                </tr>
+                <tr>
+                    <td><code>https://raccoon.@ViewBag.RootDomain/diary</code></td>
+                    <td>дневник наблюдений, автоматически отфильтрованный по этому животному</td>
+                </tr>
+                <tr>
+                    <td><code>https://@ViewBag.RootDomain/raccoon</code></td>
+                    <td>301-редирект на поддомен <code>raccoon.@ViewBag.RootDomain</code></td>
+                </tr>
+                <tr>
+                    <td><code>https://@ViewBag.RootDomain/api/animals/raccoon</code></td>
+                    <td>REST API карточки животного (JWT для защищённых методов)</td>
+                </tr>
+                <tr>
+                    <td><code>https://www.@ViewBag.RootDomain/…</code></td>
+                    <td>служебные поддомены (www, api, admin) исключены из поддомен-роутинга</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="zoo-card">
+            <h2>Текущий запрос</h2>
+            <ul class="zoo-kv">
+                <li><span>Host запроса</span><code>@ViewBag.Host</code></li>
+                <li><span>Корневой домен (конфигурация)</span><code>@ViewBag.RootDomain</code></li>
+                <li><span>Определённый поддомен</span><code>@(ViewBag.DetectedSlug ?? "не определён (корневой домен)")</code></li>
+                <li><span>Сайт зоопарка</span><a href="@ViewBag.MainSite" target="_blank" rel="noopener">@ViewBag.MainSite</a></li>
+            </ul>
+
+            <h3>Проверка поддоменов</h3>
+            <p class="zoo-muted small">
+                В боевой среде достаточно DNS-записи <code>*.@ViewBag.RootDomain → IP сервера</code> и одного приложения:
+                оно само определяет животное по хосту. Для локальной проверки браузеры резолвят
+                <code>*.localhost</code> автоматически, поэтому внизу приведены оба варианта адресов.
+            </p>
+            <ul class="zoo-list">
+                @foreach (var url in animalUrls)
+                {
+                    <li><a href="@url" target="_blank" rel="noopener">@url</a> <span class="zoo-muted">(боевой адрес)</span></li>
+                }
+                @foreach (var url in animalUrlsLocal)
+                {
+                    <li><a href="@url" target="_blank" rel="noopener">@url</a> <span class="zoo-muted">(текущий стенд)</span></li>
+                }
+            </ul>
+        </section>
+    </div>
+
+    <section class="zoo-card">
+        <h2>Как это реализовано в коде</h2>
+        <ol class="zoo-list zoo-list--numbered">
+            <li><code>ZooSubdomain.GetAnimalSlug(host)</code> — вытаскивает первый уровень поддомена (raccoon.zoostav.ru → raccoon), игнорируя www/api/admin.</li>
+            <li><code>UseSubdomainRouting()</code> (middleware) — переписывает путь <code>/</code> в <code>/animal/{slug}</code>, не меняя адрес в браузере.</li>
+            <li><code>AnimalController.Page</code> — отдаёт страницу животного; для запроса на корневом домене делает 301 на поддомен.</li>
+            <li>Ссылки на поддомены формирует <code>ZooSubdomain.BuildAnimalUrl(slug)</code> — настраивается через <code>Zoo:RootDomain</code> в <code>appsettings.json</code>.</li>
+        </ol>
+    </section>
+</div>

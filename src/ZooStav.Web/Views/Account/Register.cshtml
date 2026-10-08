@@ -1,0 +1,54 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Регистрация";
+}
+
+<div class="container">
+    <div class="zoo-auth-wrap zoo-auth-wrap--single">
+        <section class="zoo-card zoo-form-card">
+            <h1>Регистрация посетителя</h1>
+            <p class="zoo-muted">
+                Новому пользователю назначается роль <code>Visitor</code>: доступны информация о животных,
+                медиа, веб-камера, донаты и просмотр дневника. Роль <code>Staff</code> выдаёт администрация зоопарка.
+            </p>
+
+            <form asp-action="Register" method="post" class="zoo-form">
+                <div asp-validation-summary="All" class="zoo-validation"></div>
+
+                <label>
+                    <span>Имя и фамилия</span>
+                    <input asp-for="FullName" placeholder="Иван Петров"/>
+                    <span asp-validation-for="FullName"></span>
+                </label>
+
+                <label>
+                    <span>E-mail</span>
+                    <input asp-for="Email" type="email" placeholder="you@example.com"/>
+                    <span asp-validation-for="Email"></span>
+                </label>
+
+                <label>
+                    <span>Пароль (не короче 6 символов)</span>
+                    <input asp-for="Password" type="password" autocomplete="new-password"/>
+                    <span asp-validation-for="Password"></span>
+                </label>
+
+                <label>
+                    <span>Повторите пароль</span>
+                    <input asp-for="ConfirmPassword" type="password" autocomplete="new-password"/>
+                    <span asp-validation-for="ConfirmPassword"></span>
+                </label>
+
+                <label class="zoo-checkbox">
+                    <input asp-for="Consent" type="checkbox"/>
+                    <span>Даю согласие на обработку персональных данных</span>
+                </label>
+
+                <div class="zoo-form__actions">
+                    <button type="submit" class="btn btn-accent btn-lg">Зарегистрироваться</button>
+                    <a class="btn btn-outline btn-lg" asp-action="Login">У меня уже есть аккаунт</a>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>

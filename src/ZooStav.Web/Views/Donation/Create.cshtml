@@ -1,0 +1,118 @@
+@model DonationCreateViewModel
+@{
+    ViewData["Title"] = "Донат на корм и лечение";
+    var animal = ViewBag.Animal as Animal;
+    decimal total = ViewBag.DonationsTotal is decimal d ? d : 0m;
+}
+
+<div class="container">
+    <header class="zoo-page-head">
+        <div>
+            <h1>Донат на корм и лечение</h1>
+            <p class="zoo-muted">
+                Free donation: любая сумма — от 1 ₽. Собранные средства направляются на рыбу, творог, витамины,
+                обогащение среды и ветеринарный уход за животным.
+                @if (animal is not null)
+                {
+                    <span>Страница животного: <a asp-controller="Animal" asp-action="Page" asp-route-slug="@animal.Slug">@animal.Name</a>.</span>
+                }
+            </p>
+        </div>
+    </header>
+
+    <div class="zoo-section zoo-section--split">
+        <section class="zoo-card zoo-form-card">
+            <form asp-action="Create" asp-route-slug="@animal?.Slug" method="post" class="zoo-form">
+                <div asp-validation-summary="All" class="zoo-validation"></div>
+                <input type="hidden" asp-for="AnimalId"/>
+                <input type="hidden" asp-for="AnimalName"/>
+
+                <div class="zoo-form__grid">
+                    <label>
+                        <span>Имя или организация</span>
+                        <input asp-for="DonorName" placeholder="Как подписать донат"/>
+                        <span asp-validation-for="DonorName"></span>
+                    </label>
+
+                    <label>
+                        <span>E-mail для чека</span>
+                        <input asp-for="DonorEmail" type="email" placeholder="необязательно"/>
+                        <span asp-validation-for="DonorEmail"></span>
+                    </label>
+
+                    <label>
+                        <span>Сумма, ₽</span>
+                        <input asp-for="Amount" type="number" min="1" step="50"/>
+                        <span asp-validation-for="Amount"></span>
+                    </label>
+
+                    <label>
+                        <span>Назначение</span>
+                        <select asp-for="Purpose">
+                            @foreach (var purpose in DonationPurposes.All)
+                            {
+                                <option value="@purpose" selected="@(Model.Purpose == purpose)">@DonationPurposes.Title(purpose)</option>
+                            }
+                        </select>
+                    </label>
+
+                    <label class="zoo-form__wide">
+                        <span>Сообщение животному</span>
+                        <textarea asp-for="Message" rows="3" placeholder="Например: Тимке на рыбку!"></textarea>
+                    </label>
+                </div>
+
+                <div class="zoo-donate-presets">
+                    @foreach (var amount in new[] { 300, 500, 1000, 3000 })
+                    {
+                        <button type="button" class="zoo-preset" data-amount="@amount">@amount ₽</button>
+                    }
+                </div>
+
+                <div class="zoo-form__actions">
+                    <button type="submit" class="btn btn-accent btn-lg">Поддержать ❤</button>
+                    @if (animal is not null)
+                    {
+                        <a class="btn btn-outline btn-lg" asp-controller="Animal" asp-action="Page" asp-route-slug="@animal.Slug">
+                            Вернуться на страницу животного
+                        </a>
+                    }
+                </div>
+
+                <p class="zoo-muted small">
+                    Оплата выполняется демонстрационным платёжным шлюзом (реальная интеграция ЮKassa/CloudPayments
+                    подключается заменой <code>IPaymentService</code>). При донате от авторизованного пользователя
+                    запись связывается с его учётной записью.
+                </p>
+            </form>
+        </section>
+
+        <aside>
+            <section class="zoo-card">
+                <h2>Итоги сборов</h2>
+                <p class="zoo-progress__caption">
+                    Всего собрано: <strong>@total.ToString("N0") ₽</strong>
+                </p>
+                <ul class="zoo-list">
+                    <li>🍎 Корм — рыба, мясо, творог, фрукты</li>
+                    <li>🩺 Лечение — вакцинация, осмотры, препараты</li>
+                    <li>🏡 Уход — обогащение среды, платформы, поилки</li>
+                </ul>
+                <a class="btn btn-outline btn-block" asp-controller="Donation" asp-action="Index">Все донаты →</a>
+            </section>
+
+            <section class="zoo-card">
+                <h2>API донатов</h2>
+                <pre class="zoo-code zoo-code--small">POST /api/donations
+{
+  "animalSlug": "raccoon",
+  "donorName": "Анна К.",
+  "amount": 500,
+  "purpose": "food",
+  "message": "На рыбку!"
+}</pre>
+                <a class="btn btn-outline btn-block" href="/swagger" target="_blank">Swagger UI →</a>
+            </section>
+        </aside>
+    </div>
+</div>
