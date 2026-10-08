@@ -211,6 +211,6 @@ public class ApiDiaryController(
     [AllowAnonymous]
     public IActionResult GetTypes() =>
         Ok(ApiResponse<List<object>>.Ok(Enum.GetValues<DiaryEntryType>()
-            .Select(t => (object)new { value = t.ToString(), id = (int)t, title = t.Title(), icon = t.Icon() })
+            .Select(t => (object)new { value = t.ToString(), id = (int)t, title = t.Title() })
             .ToList()));
 }

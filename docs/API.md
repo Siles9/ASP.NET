@@ -228,7 +228,7 @@ curl http://localhost:5045/api/diary/types
 ```
 
 ```json
-{ "success": true, "data": [ { "value": "Feeding", "id": 0, "title": "Кормление", "icon": "🍎" } ] }
+{ "success": true, "data": [ { "value": "Feeding", "id": 0, "title": "Кормление" } ] }
 ```
 
 ---

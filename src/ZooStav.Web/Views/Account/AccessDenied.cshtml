@@ -5,7 +5,6 @@
 
 <div class="container">
     <section class="zoo-card zoo-denied">
-        <div class="zoo-denied__icon">🔒</div>
         <h1>Доступ запрещён</h1>
 
         @if (Model.IsAnonymous)
@@ -17,7 +16,7 @@
             <div class="zoo-denied__actions">
                 <a class="btn btn-accent btn-lg" asp-controller="Account" asp-action="Login">Войти</a>
                 <a class="btn btn-outline btn-lg" asp-controller="Account" asp-action="Register">Регистрация</a>
-                <a class="btn btn-outline btn-lg" href="https://zoostav.ru" target="_blank" rel="noopener">Сайт зоопарка ↗</a>
+                <a class="btn btn-outline btn-lg" href="https://zoostav.ru" target="_blank" rel="noopener">Сайт зоопарка</a>
             </div>
         }
         else

@@ -43,11 +43,11 @@
 
             <div class="animal-hero__actions">
                 <a class="btn btn-accent btn-lg" asp-controller="Donation" asp-action="Create" asp-route-slug="@a.Slug">
-                    ❤ Покормить / поддержать
+                    Покормить / поддержать
                 </a>
-                <a class="btn btn-light btn-lg" href="#webcam">📹 Веб-камера</a>
+                <a class="btn btn-light btn-lg" href="#webcam">Веб-камера</a>
                 <a class="btn btn-outline-light btn-lg" asp-controller="Diary" asp-action="Index">
-                    📖 Дневник наблюдений (@Model.DiaryEntriesCount)
+                    Дневник наблюдений (@Model.DiaryEntriesCount)
                 </a>
             </div>
         </div>
@@ -63,7 +63,7 @@
             Адрес страницы: <code>@Model.PublicUrl</code>
         </div>
         <a class="btn btn-accent" href="@zoo.MainSiteUrl" target="_blank" rel="noopener">
-            Перейти на главную страницу зоопарка — @zoo.MainSiteUrl ↗
+            Перейти на главную страницу зоопарка: @zoo.MainSiteUrl
         </a>
     </div>
 
@@ -89,11 +89,11 @@
                 <p>@a.History</p>
                 <div class="zoo-two-col">
                     <div>
-                        <h3>🌍 Природный ареал и образ жизни</h3>
+                        <h3>Природный ареал и образ жизни</h3>
                         <p>@a.Habitat</p>
                     </div>
                     <div>
-                        <h3>🍽 Рацион</h3>
+                        <h3>Рацион</h3>
                         <p>@a.Diet</p>
                     </div>
                 </div>
@@ -194,7 +194,6 @@
                         @foreach (var entry in Model.RecentDiary)
                         {
                             <li class="zoo-timeline__item @entry.Type.CssClass()">
-                                <div class="zoo-timeline__icon">@entry.Type.Icon()</div>
                                 <div class="zoo-timeline__body">
                                     <div class="zoo-timeline__meta">
                                         <span class="zoo-tag">@entry.Type.Title()</span>
@@ -219,7 +218,7 @@
                     @if (isStaff)
                     {
                         <a class="btn btn-accent" asp-controller="Diary" asp-action="Create" asp-route-animalId="@a.Id">
-                            ✚ Добавить запись в дневник
+                            Добавить запись в дневник
                         </a>
                         <span class="zoo-muted">Вы вошли как работник зоопарка — доступна запись в дневник.</span>
                     }
@@ -241,7 +240,7 @@
 
         <aside class="animal-side">
             <section class="zoo-card zoo-donate-card" id="donate">
-                <h2>❤ Донат на корм и лечение</h2>
+                <h2>Донат на корм и лечение</h2>
                 <p class="zoo-muted">Собранные средства идут на рыбу, творог, витамины и ветеринарный уход.</p>
 
                 <div class="zoo-progress">
@@ -276,7 +275,7 @@
                 <ul class="zoo-legend">
                     @foreach (var type in Enum.GetValues<DiaryEntryType>())
                     {
-                        <li><span>@type.Icon()</span> @type.Title()</li>
+                        <li>@type.Title()</li>
                     }
                 </ul>
                 <p class="zoo-muted small">

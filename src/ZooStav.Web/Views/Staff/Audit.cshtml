@@ -68,7 +68,7 @@
                 <tr class="@(log.Success ? "" : "zoo-row--error")">
                     <td>@log.TimestampUtc.ToString("dd.MM.yyyy HH:mm:ss")</td>
                     <td><code>@log.Action</code></td>
-                    <td>@(log.Success ? "✔" : "✘")</td>
+                    <td>@(log.Success ? "успешно" : "ошибка")</td>
                     <td>@(log.UserName ?? "—")</td>
                     <td>@(log.Role ?? "—")</td>
                     <td>@(log.IpAddress ?? "—")</td>

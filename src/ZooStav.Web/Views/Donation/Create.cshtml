@@ -70,7 +70,7 @@
                 </div>
 
                 <div class="zoo-form__actions">
-                    <button type="submit" class="btn btn-accent btn-lg">Поддержать ❤</button>
+                    <button type="submit" class="btn btn-accent btn-lg">Поддержать</button>
                     @if (animal is not null)
                     {
                         <a class="btn btn-outline btn-lg" asp-controller="Animal" asp-action="Page" asp-route-slug="@animal.Slug">
@@ -94,9 +94,9 @@
                     Всего собрано: <strong>@total.ToString("N0") ₽</strong>
                 </p>
                 <ul class="zoo-list">
-                    <li>🍎 Корм — рыба, мясо, творог, фрукты</li>
-                    <li>🩺 Лечение — вакцинация, осмотры, препараты</li>
-                    <li>🏡 Уход — обогащение среды, платформы, поилки</li>
+                    <li>Корм — рыба, мясо, творог, фрукты</li>
+                    <li>Лечение — вакцинация, осмотры, препараты</li>
+                    <li>Уход — обогащение среды, платформы, поилки</li>
                 </ul>
                 <a class="btn btn-outline btn-block" asp-controller="Donation" asp-action="Index">Все донаты →</a>
             </section>

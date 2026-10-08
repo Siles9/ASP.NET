@@ -59,7 +59,7 @@
         if (timeline) {
             var item = document.createElement('li');
             item.className = 'zoo-timeline__item zoo-feed__new';
-            item.innerHTML = '<div class="zoo-timeline__icon">🆕</div><div class="zoo-timeline__body">' +
+            item.innerHTML = '<div class="zoo-timeline__body">' +
                 '<div class="zoo-timeline__meta"><span class="zoo-tag">' + entry.type + '</span>' +
                 '<time>' + new Date(entry.occurredAtUtc).toLocaleString('ru-RU') + '</time>' +
                 '<span class="zoo-muted">· только что добавлено</span></div>' +

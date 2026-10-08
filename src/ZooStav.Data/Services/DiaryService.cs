@@ -175,17 +175,4 @@ public static class DiaryEntryTypeExtensions
 
     public static string CssClass(this DiaryEntryType type) => "type-" + type.ToString().ToLowerInvariant();
 
-    public static string Icon(this DiaryEntryType type) => type switch
-    {
-        DiaryEntryType.Feeding => "🍎",
-        DiaryEntryType.Vaccination => "💉",
-        DiaryEntryType.Mating => "❤",
-        DiaryEntryType.Offspring => "🐾",
-        DiaryEntryType.Illness => "🌡",
-        DiaryEntryType.Treatment => "🩺",
-        DiaryEntryType.Measurement => "📏",
-        DiaryEntryType.Relocation => "🚚",
-        DiaryEntryType.Observation => "🔎",
-        _ => "📌"
-    };
 }

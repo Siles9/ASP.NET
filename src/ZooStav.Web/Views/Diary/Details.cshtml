@@ -12,7 +12,7 @@
             </p>
             <h1>@Model.Title</h1>
             <p class="zoo-muted">
-                <span class="zoo-tag @Model.Type.CssClass()">@Model.Type.Icon() @Model.Type.Title()</span>
+                <span class="zoo-tag @Model.Type.CssClass()">@Model.Type.Title()</span>
                 <time>@Model.OccurredAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</time>
             </p>
         </div>

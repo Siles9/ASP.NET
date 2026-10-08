@@ -32,7 +32,7 @@
                     <select asp-for="Type">
                         @foreach (var type in Enum.GetValues<DiaryEntryType>())
                         {
-                            <option value="@type" selected="@(Model.Type == type)">@type.Icon() @type.Title()</option>
+                            <option value="@type" selected="@(Model.Type == type)">@type.Title()</option>
                         }
                     </select>
                     <span asp-validation-for="Type"></span>

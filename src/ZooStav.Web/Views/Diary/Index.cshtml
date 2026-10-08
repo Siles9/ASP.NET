@@ -36,7 +36,7 @@
         <div class="zoo-page-head__actions">
             @if (isStaff)
             {
-                <a class="btn btn-accent" asp-action="Create" asp-route-animalId="@ViewBag.AnimalId">✚ Новая запись</a>
+                <a class="btn btn-accent" asp-action="Create" asp-route-animalId="@ViewBag.AnimalId">Новая запись</a>
             }
             else if (isAuth)
             {
@@ -75,7 +75,7 @@
                         <option value="">— все типы —</option>
                         @foreach (var type in Enum.GetValues<DiaryEntryType>())
                         {
-                            <option value="@type" selected="@(f.Type == type)">@type.Icon() @type.Title()</option>
+                            <option value="@type" selected="@(f.Type == type)">@type.Title()</option>
                         }
                     </select>
                 </label>
@@ -157,7 +157,6 @@
                     @foreach (var entry in result.Items)
                     {
                         <li class="zoo-timeline__item @entry.Type.CssClass()">
-                            <div class="zoo-timeline__icon">@entry.Type.Icon()</div>
                             <div class="zoo-timeline__body">
                                 <div class="zoo-timeline__meta">
                                     <span class="zoo-tag">@entry.Type.Title()</span>
@@ -222,7 +221,7 @@
                         var count = Model.TypeStats.TryGetValue(type, out var c) ? c : 0;
                         <li class="@(f.Type == type ? "is-active" : "")">
                             <a asp-action="Index" asp-route-slug="@f.Slug" asp-route-type="@type">
-                                <span>@type.Icon() @type.Title()</span>
+                                <span>@type.Title()</span>
                                 <strong>@count</strong>
                             </a>
                         </li>
@@ -250,7 +249,7 @@
                     @foreach (var item in Model.Feed)
                     {
                         <li>
-                            <span class="zoo-tag zoo-tag--sm">@item.Type.Icon() @item.Type.Title()</span>
+                            <span class="zoo-tag zoo-tag--sm">@item.Type.Title()</span>
                             <a asp-action="Details" asp-route-id="@item.Id">@item.Title</a>
                             <small>@item.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm") · @item.CreatedVia</small>
                         </li>

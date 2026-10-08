@@ -22,7 +22,7 @@
                 <a class="btn btn-accent btn-lg" asp-controller="Animal" asp-action="Index">Смотреть животных</a>
                 <a class="btn btn-light btn-lg" asp-controller="Diary" asp-action="Index">Дневник наблюдений</a>
                 <a class="btn btn-outline-light btn-lg" href="@zoo.MainSiteUrl" target="_blank" rel="noopener">
-                    Сайт зоопарка: zoostav.ru ↗
+                    Сайт зоопарка: zoostav.ru
                 </a>
             </div>
             @if (!isAuth)
@@ -74,8 +74,8 @@
                         <p class="zoo-muted"><em>@card.Animal.LatinName</em></p>
                         <p>@(card.Animal.Summary.Length > 160 ? card.Animal.Summary[..160] + "…" : card.Animal.Summary)</p>
                         <div class="zoo-animal-card__meta">
-                            <span>📖 @card.DiaryEntriesCount записей</span>
-                            <span>📍 @card.Animal.Enclosure</span>
+                            <span>Записей в дневнике: @card.DiaryEntriesCount</span>
+                            <span>@card.Animal.Enclosure</span>
                         </div>
                         <div class="zoo-animal-card__actions">
                             <a class="btn btn-accent" href="@card.PublicUrl">Открыть страницу</a>
