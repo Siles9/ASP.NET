@@ -267,7 +267,7 @@ namespace ZooStav.Migrations.Sqlite.Migrations
                     Description = table.Column<string>(type: "TEXT", nullable: false),
                     PerformedBy = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
                     SearchText = table.Column<string>(type: "TEXT", maxLength: 1200, nullable: false),
-                    UserId = table.Column<string>(type: "TEXT", maxLength: 64, nullable: true),
+                    UserId = table.Column<string>(type: "TEXT", maxLength: 450, nullable: true),
                     Location = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
                     CreatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CreatedVia = table.Column<string>(type: "TEXT", maxLength: 16, nullable: false)

@@ -267,7 +267,7 @@ namespace ZooStav.Migrations.SqlServer.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PerformedBy = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     SearchText = table.Column<string>(type: "nvarchar(1200)", maxLength: 1200, nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: true),
                     Location = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedVia = table.Column<string>(type: "nvarchar(16)", maxLength: 16, nullable: false)

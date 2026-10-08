@@ -328,8 +328,8 @@ namespace ZooStav.Migrations.SqlServer.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 

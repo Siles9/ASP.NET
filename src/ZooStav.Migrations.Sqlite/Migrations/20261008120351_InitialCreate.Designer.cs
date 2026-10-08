@@ -312,7 +312,7 @@ namespace ZooStav.Migrations.Sqlite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("UserId")
-                        .HasMaxLength(64)
+                        .HasMaxLength(450)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

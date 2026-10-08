@@ -129,7 +129,7 @@ public class DiaryEntry
     [MaxLength(1200)]
     public string SearchText { get; set; } = string.Empty;
 
-    [MaxLength(64)]
+    [MaxLength(450)]
     public string? UserId { get; set; }
     public ZooUser? User { get; set; }
 
