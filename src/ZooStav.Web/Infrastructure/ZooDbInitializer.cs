@@ -82,6 +82,7 @@ public static class ZooDbInitializer
 
         if (await db.Animals.AnyAsync(ct))
         {
+            await RefreshDemoVideosAsync(db, ct);
             return;
         }
 
@@ -147,22 +148,9 @@ public static class ZooDbInitializer
                 Title = "Вольер №7 сегодня (стоп-кадр с веб-камеры)",
                 Url = "/images/raccoon/raccoon-enclosure.jpg"
             },
-            new()
-            {
-                Type = MediaType.Video,
-                Title = "Завтрак Тимки: кормление с рук",
-                Url = "https://www.youtube.com/embed/P73REgj-3UE",
-                PosterUrl = "/images/raccoon/raccoon-feeding.jpg"
-            },
-            new()
-            {
-                Type = MediaType.Video,
-                Title = "Ночная жизнь вольера №7",
-                Url = "https://www.youtube.com/embed/Y8Wp3dafaMQ",
-                PosterUrl = "/images/raccoon/raccoon-enclosure.jpg"
-            }
         };
 
+        media.AddRange(DemoVideos());
         raccoon.Media = media;
 
         var diary = new List<DiaryEntry>
@@ -337,5 +325,50 @@ public static class ZooDbInitializer
             raccoon.Slug, diary.Count);
 
         _ = visitor;
+    }
+
+    private static List<MediaItem> DemoVideos() =>
+    [
+        new()
+        {
+            Type = MediaType.Video,
+            Title = "Еноты-полоскуны в новом вольере Московского зоопарка",
+            Url = "https://www.youtube.com/embed/Ov0MdZ-0SeA"
+        },
+        new()
+        {
+            Type = MediaType.Video,
+            Title = "Еноты в уличном вольере зоопарка Нортумберленда",
+            Url = "https://www.youtube.com/embed/N-2PjxIBYZo"
+        }
+    ];
+
+    private static async Task RefreshDemoVideosAsync(ZooDbContext db, CancellationToken ct)
+    {
+        var raccoonId = await db.Animals.Where(a => a.Slug == "raccoon").Select(a => a.Id).FirstOrDefaultAsync(ct);
+        if (raccoonId == 0)
+        {
+            return;
+        }
+
+        var stale = await db.MediaItems
+            .Where(m => m.AnimalId == raccoonId && m.Type == MediaType.Video)
+            .OrderBy(m => m.Id)
+            .ToListAsync(ct);
+        var fresh = DemoVideos();
+
+        if (stale.Select(m => m.Url).SequenceEqual(fresh.Select(m => m.Url)))
+        {
+            return;
+        }
+
+        db.MediaItems.RemoveRange(stale);
+        foreach (var video in fresh)
+        {
+            video.AnimalId = raccoonId;
+        }
+
+        db.MediaItems.AddRange(fresh);
+        await db.SaveChangesAsync(ct);
     }
 }
