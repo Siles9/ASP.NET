@@ -10,10 +10,6 @@ using ZooStav.Web.ViewModels;
 
 namespace ZooStav.Web.Controllers;
 
-/// <summary>
-/// Донаты на корм/лечение. Доступно всем: и авторизованным, и анонимным посетителям
-/// (free donation). Авторизованные донаты привязываются к учётной записи.
-/// </summary>
 public class DonationController(
     ZooDbContext db,
     IPaymentService payments,
@@ -113,7 +109,6 @@ public class DonationController(
         return View(donation);
     }
 
-    /// <summary>Список донатов (прозрачная отчётность перед посетителями).</summary>
     [HttpGet]
     [Route("donations")]
     public async Task<IActionResult> Index(CancellationToken ct)
@@ -130,10 +125,6 @@ public class DonationController(
         return View(donations);
     }
 
-    /// <summary>
-    /// Сумма успешных донатов животного. Считается в памяти: SQLite не поддерживает SUM по decimal,
-    /// такой вариант работает одинаково и на SQL Server, и на SQLite.
-    /// </summary>
     private async Task<decimal> SumDonationsAsync(int animalId, CancellationToken ct)
     {
         var amounts = await db.Donations

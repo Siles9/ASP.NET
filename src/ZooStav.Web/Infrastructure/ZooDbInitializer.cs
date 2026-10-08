@@ -5,13 +5,8 @@ using ZooStav.Web.Domain;
 
 namespace ZooStav.Web.Infrastructure;
 
-/// <summary>
-/// Создаёт БД, применяет миграции нужного провайдера и наполняет её демонстрационными данными
-/// (животное "Енот-полоскун", тестовые пользователи, записи дневника, донаты).
-/// </summary>
 public static class ZooDbInitializer
 {
-    /// <summary>Тестовые учётные записи (указаны в README для проверки).</summary>
     public static readonly (string Email, string Password, string Role, string FullName)[] SeedUsers =
     {
         ("keeper@zoostav.ru", "Keeper#2026", ZooRoles.Staff, "Смотритель вольера Енотов"),
@@ -49,7 +44,6 @@ public static class ZooDbInitializer
             await db.Database.EnsureCreatedAsync(ct);
         }
 
-        // 1. Роли
         foreach (var role in ZooRoles.All)
         {
             if (!await roleManager.RoleExistsAsync(role))
@@ -58,7 +52,6 @@ public static class ZooDbInitializer
             }
         }
 
-        // 2. Пользователи
         foreach (var (email, password, role, fullName) in SeedUsers)
         {
             var user = await userManager.FindByEmailAsync(email);
@@ -87,7 +80,6 @@ public static class ZooDbInitializer
             }
         }
 
-        // 3. Животное, медиа, дневник, донаты
         if (await db.Animals.AnyAsync(ct))
         {
             return;
@@ -353,6 +345,6 @@ public static class ZooDbInitializer
         logger.LogInformation("Демонстрационные данные созданы: животное {Slug}, записей дневника: {Count}",
             raccoon.Slug, diary.Count);
 
-        _ = visitor; // посетитель создан на шаге 2, здесь только ссылка для наглядности
+        _ = visitor;
     }
 }

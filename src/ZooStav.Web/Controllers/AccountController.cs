@@ -12,10 +12,6 @@ using ZooStav.Web.ViewModels;
 
 namespace ZooStav.Web.Controllers;
 
-/// <summary>
-/// Аутентификация/авторизация для MVC-части: cookie-вход, регистрация, выход, профиль.
-/// Для API-клиентов JWT-токены выдаёт /api/auth/login (см. ApiAuthController).
-/// </summary>
 public class AccountController(
     SignInManager<ZooUser> signInManager,
     UserManager<ZooUser> userManager,
@@ -64,7 +60,6 @@ public class AccountController(
                 ? $"Здравствуйте, {user?.FullName ?? model.Email}! Доступ к дневнику наблюдений открыт."
                 : $"Здравствуйте, {user?.FullName ?? model.Email}! Вы вошли как посетитель.";
 
-            // Сотрудника после входа удобнее сразу отправить в дневник.
             if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
             {
                 return Redirect(model.ReturnUrl);
@@ -122,8 +117,6 @@ public class AccountController(
             return View(model);
         }
 
-        // Новые пользователи — посетители. Роль "Staff" выдаёт администрация зоопарка
-        // (в демо-проекте сотрудник уже создан при инициализации БД).
         await userManager.AddToRoleAsync(user, ZooRoles.Visitor);
         await signInManager.SignInAsync(user, isPersistent: true);
         await audit.WriteAsync("Register", true, $"Регистрация пользователя {model.Email}", user.Id, model.Email, ZooRoles.Visitor);
@@ -172,7 +165,6 @@ public class AccountController(
         return View(model);
     }
 
-    /// <summary>Подсказка для проверяющего: демонстрационные логины и пароли.</summary>
     [AllowAnonymous]
     [HttpGet]
     public IActionResult Demo() => View(_zoo);

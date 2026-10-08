@@ -9,7 +9,7 @@
             <h1>Логины и пароли для проверки</h1>
             <p class="zoo-muted">
                 Учётные записи создаются автоматически при первом запуске приложения (инициализация БД).
-                Эти же данные указаны в README.md проекта.
+                Эти же данные указаны в README.txt проекта.
             </p>
         </div>
     </header>
@@ -46,18 +46,11 @@
 
     <section class="zoo-card">
         <h2>Как проверить JWT-аутентификацию API</h2>
-        <pre class="zoo-code"># 1. Получить токен сотрудника
-curl -X POST "@Url.Action("Login", "ApiAuth", new { area = "" })" -H "Content-Type: application/json" -d "{\"email\":\"keeper@zoostav.ru\",\"password\":\"Keeper#2026\"}"
-
-# 2. Добавить запись в дневник (нужна роль Staff)
+        <pre class="zoo-code">curl -X POST "@Url.Action("Login", "ApiAuth", new { area = "" })" -H "Content-Type: application/json" -d "{\"email\":\"keeper@zoostav.ru\",\"password\":\"Keeper#2026\"}"
 curl -X POST "/api/animals/raccoon/diary" \
   -H "Authorization: Bearer &lt;accessToken&gt;" -H "Content-Type: application/json" \
   -d "{\"type\":\"Feeding\",\"title\":\"Вечернее кормление\",\"description\":\"90 г рыбы\",\"performedBy\":\"Смотритель\"}"
-
-# 3. Прочитать дневник с фильтрами (публично)
 curl "/api/animals/raccoon/diary?type=Vaccination&dateFrom=2026-01-01&sort=date_desc&pageSize=5"
-
-# 4. Проверить, что гость не может писать: без токена вернётся 401
 curl -X POST "/api/animals/raccoon/diary" -H "Content-Type: application/json" -d "{\"title\":\"test\"}"</pre>
 
         <div class="zoo-api-links">

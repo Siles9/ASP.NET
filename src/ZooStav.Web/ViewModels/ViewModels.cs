@@ -4,7 +4,6 @@ using ZooStav.Web.Services;
 
 namespace ZooStav.Web.ViewModels;
 
-/// <summary>Данные для страницы животного (поддомен raccoon.zoostav.ru).</summary>
 public class AnimalPageViewModel
 {
     public Animal Animal { get; set; } = new();
@@ -16,10 +15,8 @@ public class AnimalPageViewModel
     public int DonationsCount { get; set; }
     public List<Donation> RecentDonations { get; set; } = new();
 
-    /// <summary>Абсолютная ссылка на поддомен животного (для вывода на главной странице зоопарка).</summary>
     public string PublicUrl { get; set; } = string.Empty;
 
-    /// <summary>Главная страница зоопарка (обязательная ссылка по заданию).</summary>
     public string ZooMainSiteUrl { get; set; } = "https://zoostav.ru";
 }
 
@@ -31,7 +28,6 @@ public class DiaryIndexViewModel
     public List<string> AvailableUsers { get; set; } = new();
     public List<DiaryEntry> Feed { get; set; } = new();
 
-    /// <summary>Статистика по типам записей (для сводки).</summary>
     public Dictionary<DiaryEntryType, int> TypeStats { get; set; } = new();
 }
 
@@ -66,7 +62,6 @@ public class LoginViewModel
 
     public string? ReturnUrl { get; set; }
 
-    /// <summary>Ссылка на страницу животного, с которой пришёл пользователь (для возврата на поддомен).</summary>
     public string? AnimalHost { get; set; }
 }
 
@@ -101,7 +96,6 @@ public class DiaryCreateViewModel
 {
     public int AnimalId { get; set; }
 
-    /// <summary>Список животных для выпадающего списка (заполняется контроллером).</summary>
     public List<Animal> Animals { get; set; } = new();
 
     [Required(ErrorMessage = "Выберите тип записи")]

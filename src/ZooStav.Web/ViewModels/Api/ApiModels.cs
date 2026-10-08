@@ -3,8 +3,6 @@ using ZooStav.Web.Domain;
 
 namespace ZooStav.Web.ViewModels.Api;
 
-// ---------- Auth ----------
-
 public class ApiRegisterRequest
 {
     [Required, EmailAddress]
@@ -53,8 +51,6 @@ public class ApiUserDto
     public DateTime CreatedAtUtc { get; set; }
 }
 
-// ---------- Animal ----------
-
 public class ApiAnimalDto
 {
     public int Id { get; set; }
@@ -75,7 +71,6 @@ public class ApiAnimalDto
     public string SubdomainUrl { get; set; } = string.Empty;
     public string ZooMainSiteUrl { get; set; } = string.Empty;
 
-    /// <summary>Записи дневника доступны только ролям Staff (при запросе с токеном сотрудника).</summary>
     public bool DiaryAvailable { get; set; }
 
     public List<ApiMediaDto> Photos { get; set; } = new();
@@ -101,8 +96,6 @@ public class ApiDonationSummaryDto
     public decimal CareTotal { get; set; }
     public List<ApiDonationDto> Recent { get; set; } = new();
 }
-
-// ---------- Diary ----------
 
 public class ApiDiaryEntryDto
 {
@@ -162,8 +155,6 @@ public class ApiDiaryUpdateRequest
     [MaxLength(200)]
     public string Location { get; set; } = string.Empty;
 }
-
-// ---------- Donations ----------
 
 public class ApiDonationCreateRequest
 {

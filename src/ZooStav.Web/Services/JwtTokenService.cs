@@ -15,7 +15,6 @@ public interface ITokenService
     ClaimsPrincipal? ValidateToken(string token, bool validateLifetime = true);
 }
 
-/// <summary>Выдача и проверка JWT-токенов (аутентификация API-клиентов).</summary>
 public class JwtTokenService(IOptions<JwtOptions> options) : ITokenService
 {
     private readonly JwtOptions _options = options.Value;

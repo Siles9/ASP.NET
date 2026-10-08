@@ -1,7 +1,3 @@
-/* ============================================================
-   ZooStav — страница животного зоопарка (вариант «Енот»)
-   ============================================================ */
-
 :root {
     --zoo-green-900: #10261f;
     --zoo-green-800: #16382c;
@@ -60,7 +56,6 @@ code {
 .small { font-size: .87rem; }
 .zoo-lead { font-size: 1.1rem; }
 
-/* ---------- Кнопки ---------- */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -99,7 +94,6 @@ code {
 
 .btn-link { background: none; border: none; color: var(--zoo-green-600); padding: 0; }
 
-/* ---------- Шапка ---------- */
 .zoo-header {
     background: var(--zoo-green-900);
     color: #fff;
@@ -159,7 +153,6 @@ code {
 .zoo-subdomain-bar code { background: rgba(255,255,255,.15); color: #fff; }
 .zoo-subdomain-bar a { color: var(--zoo-amber); }
 
-/* ---------- Тост ---------- */
 .zoo-toast {
     margin-top: 1rem;
     padding: .8rem 1.1rem;
@@ -173,7 +166,6 @@ code {
 
 @keyframes zoo-fade-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 
-/* ---------- Герой главной ---------- */
 .zoo-hero {
     background:
         linear-gradient(115deg, rgba(16,38,31,.94) 0%, rgba(22,56,44,.86) 55%, rgba(29,75,58,.78) 100%),
@@ -196,7 +188,6 @@ code {
 .zoo-hero__hint { color: #b7cec4; font-size: .92rem; }
 .zoo-hero__hint a { color: var(--zoo-amber); }
 
-/* ---------- Статистика ---------- */
 .zoo-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -217,7 +208,6 @@ code {
 .zoo-stats strong { font-size: 1.7rem; color: var(--zoo-green-700); line-height: 1.1; }
 .zoo-stats span { color: var(--zoo-muted); font-size: .87rem; }
 
-/* ---------- Секции ---------- */
 .zoo-section { margin: 2.6rem 0; }
 .zoo-section__head { margin-bottom: 1.4rem; }
 .zoo-section--split { display: grid; grid-template-columns: 1.35fr 1fr; gap: 1.4rem; align-items: start; }
@@ -237,7 +227,6 @@ code {
 }
 .zoo-page-head__actions { display: flex; gap: .6rem; flex-wrap: wrap; }
 
-/* ---------- Карточки ---------- */
 .zoo-card {
     background: #fff;
     border-radius: var(--zoo-radius);
@@ -266,7 +255,6 @@ code {
 .zoo-facts span { color: var(--zoo-muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
 .zoo-facts strong { font-size: 1rem; }
 
-/* ---------- Карточки животных ---------- */
 .zoo-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 1.4rem; }
 
 .zoo-animal-card {
@@ -291,7 +279,6 @@ code {
 .zoo-animal-card__meta { display: flex; flex-direction: column; gap: .2rem; color: var(--zoo-muted); font-size: .85rem; }
 .zoo-animal-card__actions { display: flex; gap: .5rem; margin-top: auto; flex-wrap: wrap; }
 
-/* ---------- Страница животного ---------- */
 .animal-hero {
     min-height: 460px;
     background-image: var(--hero-image);
@@ -345,19 +332,16 @@ code {
 .zoo-callout--warning { background: #fff5e2; color: #6b4a12; border: 1px solid #f0d8a8; }
 .zoo-callout--warning code { background: #f7e7c8; color: #6b4a12; }
 
-/* Галерея */
 .zoo-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .9rem; }
 .zoo-gallery__item { margin: 0; background: #f4f6f4; border-radius: 12px; overflow: hidden; }
 .zoo-gallery__item img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
 .zoo-gallery__item figcaption { padding: .5rem .7rem; font-size: .84rem; color: var(--zoo-muted); }
 
-/* Видео */
 .zoo-video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
 .zoo-video__frame { position: relative; aspect-ratio: 16 / 9; background: #0b1712; border-radius: 12px; overflow: hidden; }
 .zoo-video__frame iframe, .zoo-video__frame video { width: 100%; height: 100%; border: 0; display: block; }
 .zoo-video__title { margin: .5rem 0 0; font-size: .9rem; color: var(--zoo-muted); }
 
-/* Веб-камера */
 .zoo-webcam { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1rem; }
 @media (max-width: 860px) { .zoo-webcam { grid-template-columns: 1fr; } }
 .zoo-webcam__live { position: relative; aspect-ratio: 16 / 9; background: #0b1712; border-radius: 12px; overflow: hidden; }
@@ -367,7 +351,6 @@ code {
 .zoo-webcam__snapshot figcaption { font-size: .82rem; color: var(--zoo-muted); margin-top: .4rem; }
 .zoo-webcam__fallback { margin-top: .8rem; }
 
-/* Таймлайн дневника */
 .zoo-timeline { list-style: none; margin: 0; padding: 0; }
 .zoo-timeline__item {
     display: flex;
@@ -402,7 +385,6 @@ code {
 
 .zoo-diary-cta { display: flex; gap: .8rem; align-items: center; flex-wrap: wrap; margin-top: 1.2rem; padding-top: 1rem; border-top: 1px dashed var(--zoo-border); }
 
-/* Донаты */
 .zoo-donate-card { border-top: 4px solid var(--zoo-amber); }
 .zoo-progress { height: 12px; background: #eef1ee; border-radius: 999px; overflow: hidden; margin: 1rem 0 .5rem; }
 .zoo-progress__bar { height: 100%; background: linear-gradient(90deg, var(--zoo-amber), #f2c46c); border-radius: 999px; transition: width .5s ease; }
@@ -420,7 +402,6 @@ code {
 .zoo-api-list li { padding: .25rem 0; }
 .zoo-api-list code { display: inline-block; }
 
-/* ---------- Списки, таблицы, ключ-значение ---------- */
 .zoo-list { padding-left: 1.1rem; }
 .zoo-list--numbered { padding-left: 1.4rem; }
 .zoo-list li { margin: .35rem 0; }
@@ -440,7 +421,6 @@ code {
 .zoo-row--error { background: #fdf4f2; }
 .zoo-thumb { width: 72px; height: 54px; object-fit: cover; border-radius: 8px; }
 
-/* ---------- Фильтр ---------- */
 .zoo-filter__row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .9rem; align-items: end; }
 .zoo-filter label { display: flex; flex-direction: column; gap: .3rem; font-size: .85rem; }
 .zoo-filter label > span { color: var(--zoo-muted); font-weight: 600; }
@@ -468,7 +448,6 @@ code {
 .zoo-results { margin: .4rem 0 1rem; font-size: .92rem; color: var(--zoo-muted); }
 .zoo-pagination { display: flex; gap: .35rem; flex-wrap: wrap; margin-top: 1.2rem; }
 
-/* ---------- Формы ---------- */
 .zoo-form-card { max-width: 900px; }
 .zoo-form__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 @media (max-width: 700px) { .zoo-form__grid { grid-template-columns: 1fr; } }
@@ -496,7 +475,6 @@ code {
 .zoo-role-form { display: flex; gap: .4rem; align-items: center; }
 .zoo-role-form select { padding: .35rem .5rem; border-radius: 8px; border: 1px solid var(--zoo-border); }
 
-/* ---------- Роли и доступ ---------- */
 .zoo-roles { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 @media (max-width: 700px) { .zoo-roles { grid-template-columns: 1fr; } }
 .zoo-role { border-radius: 12px; padding: 1rem; border: 1px solid var(--zoo-border); }
@@ -516,7 +494,6 @@ code {
 
 @keyframes zoo-pop { from { background: #fff5e2; } to { background: transparent; } }
 
-/* ---------- CTA полоса ---------- */
 .zoo-cta-band {
     background: linear-gradient(100deg, var(--zoo-green-800), var(--zoo-green-600));
     color: #fff;
@@ -532,14 +509,12 @@ code {
 .zoo-cta-band p { margin: 0; color: #d5e6de; }
 .zoo-cta-band__actions { display: flex; gap: .7rem; flex-wrap: wrap; }
 
-/* ---------- Auth ---------- */
 .zoo-auth-wrap { display: grid; grid-template-columns: 1.2fr 1fr; gap: 1.4rem; margin: 2rem 0; align-items: start; }
 .zoo-auth-wrap--single { grid-template-columns: 1fr; }
 @media (max-width: 900px) { .zoo-auth-wrap { grid-template-columns: 1fr; } }
 .zoo-auth-aside { background: #f2f7f4; }
 .zoo-demo-credentials { margin-top: 1.4rem; padding-top: 1rem; border-top: 1px dashed var(--zoo-border); }
 
-/* ---------- Прочее ---------- */
 .zoo-code {
     background: #10261f;
     color: #d7e8e0;
@@ -559,7 +534,6 @@ code {
 .zoo-denied { text-align: center; padding: 3rem 1.5rem; max-width: 760px; margin: 2.4rem auto; }
 .zoo-denied__actions { display: flex; gap: .7rem; justify-content: center; flex-wrap: wrap; margin-top: 1.4rem; }
 
-/* ---------- Подвал ---------- */
 .zoo-footer { background: var(--zoo-green-900); color: #cfe0d8; margin-top: 3rem; padding: 2.4rem 0 1rem; }
 .zoo-footer__grid { display: grid; grid-template-columns: 1.4fr 1fr 1.2fr; gap: 1.6rem; }
 @media (max-width: 860px) { .zoo-footer__grid { grid-template-columns: 1fr; } }

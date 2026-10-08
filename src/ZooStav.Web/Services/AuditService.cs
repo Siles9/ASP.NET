@@ -11,7 +11,6 @@ public interface IAuditService
     IQueryable<AuditLog> Query();
 }
 
-/// <summary>Запись действий пользователей (вход, регистрация, работа с дневником, донаты).</summary>
 public class AuditService(ZooDbContext db, IHttpContextAccessor accessor) : IAuditService
 {
     public Task WriteAsync(string action, bool success, string details, CancellationToken ct = default)

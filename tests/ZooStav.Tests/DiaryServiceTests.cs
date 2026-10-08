@@ -7,10 +7,6 @@ using Xunit;
 
 namespace ZooStav.Tests;
 
-/// <summary>
-/// Тесты фильтрации дневника наблюдений (по дате, типу, пользователю, тексту) и пагинации.
-/// Используется SQLite в режиме in-memory: проверяется реальный SQL-запрос EF Core.
-/// </summary>
 public class DiaryServiceTests : IDisposable
 {
     private readonly SqliteConnection _connection;

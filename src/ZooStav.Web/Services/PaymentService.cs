@@ -10,10 +10,6 @@ public interface IPaymentService
     Task<PaymentResult> ProcessAsync(PaymentRequest request, CancellationToken ct = default);
 }
 
-/// <summary>
-/// Демонстрационный платёжный шлюз (free donation). Реальная интеграция (ЮKassa / CloudPayments)
-/// подключается заменой этой реализации — контроллеры и API менять не нужно.
-/// </summary>
 public class MockPaymentService(ILogger<MockPaymentService> logger) : IPaymentService
 {
     public Task<PaymentResult> ProcessAsync(PaymentRequest request, CancellationToken ct = default)

@@ -10,11 +10,6 @@ using ZooStav.Web.ViewModels;
 
 namespace ZooStav.Web.Controllers;
 
-/// <summary>
-/// Главная страница приложения (в демо — «витрина» зоопарка).
-/// Именно отсюда идёт обязательная ссылка на официальный сайт зоопарка https://zoostav.ru
-/// и ссылки на персональные поддомены животных.
-/// </summary>
 public class HomeController(
     ZooDbContext db,
     ZooSubdomain subdomains,
@@ -27,11 +22,9 @@ public class HomeController(
     [Route("index")]
     public async Task<IActionResult> Index(CancellationToken ct)
     {
-        // Если открыт поддомен животного, показываем страницу животного.
         var hostSlug = subdomains.GetAnimalSlug(Request.Host.Host);
         if (hostSlug is not null)
         {
-            // Подстраховка: если middleware не переписал путь, показываем страницу животного.
             return RedirectToAction("Page", "Animal", new { slug = hostSlug });
         }
 

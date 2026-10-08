@@ -10,14 +10,6 @@ using ZooStav.Web.ViewModels.Api;
 
 namespace ZooStav.Web.Controllers.Api;
 
-/// <summary>
-/// Аутентификация через API (JWT-токены).
-///
-/// POST /api/auth/register  — регистрация посетителя
-/// POST /api/auth/login     — получить accessToken + refreshToken
-/// POST /api/auth/refresh   — обновить accessToken
-/// GET  /api/auth/me        — текущий пользователь (нужен Bearer-токен)
-/// </summary>
 [ApiController]
 [Route("api/auth")]
 [Produces("application/json")]
@@ -57,7 +49,6 @@ public class ApiAuthController(
             return BadRequest(ApiResponse.Fail(string.Join("; ", created.Errors.Select(e => e.Description))));
         }
 
-        // Самостоятельная регистрация даёт только роль посетителя.
         await userManager.AddToRoleAsync(user, ZooRoles.Visitor);
 
         var roles = await userManager.GetRolesAsync(user);
@@ -118,15 +109,12 @@ public class ApiAuthController(
         }));
     }
 
-    /// <summary>Проверка access-токена: возвращает данные владельца токена.</summary>
     [HttpPost("refresh")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(ApiResponse<ApiAuthResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Refresh([FromBody] ApiRefreshRequest request)
     {
-        // В демонстрационном проекте refresh-токен не хранится в БД: считаем его валидным,
-        // если он передан и пользователь определяется по e-mail из заголовка Authorization.
         var header = Request.Headers.Authorization.ToString().Replace("Bearer ", string.Empty);
         var principal = tokens.ValidateToken(header, validateLifetime: false);
 

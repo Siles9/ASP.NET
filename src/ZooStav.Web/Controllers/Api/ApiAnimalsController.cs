@@ -10,16 +10,6 @@ using ZooStav.Web.ViewModels.Api;
 
 namespace ZooStav.Web.Controllers.Api;
 
-/// <summary>
-/// Публичный API информации о животных.
-///
-/// GET /api/animals            — список животных
-/// GET /api/animals/{slug}     — подробная карточка (описание, история, фото, видео, веб-камера, донаты)
-/// GET /api/animals/{slug}/media — только медиатека
-///
-/// Доступ: анонимно — только информационный блок;
-///        с Bearer-токеном роли Staff — дополнительно флаг доступности дневника.
-/// </summary>
 [ApiController]
 [Route("api/animals")]
 [Produces("application/json")]

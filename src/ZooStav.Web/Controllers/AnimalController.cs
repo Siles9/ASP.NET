@@ -10,10 +10,6 @@ using ZooStav.Web.ViewModels;
 
 namespace ZooStav.Web.Controllers;
 
-/// <summary>
-/// Страница животного. Доступна по поддомену: https://raccoon.zoostav.ru/
-/// На корневом домене — каталог животных по адресу /raccoon (и редирект на поддомен).
-/// </summary>
 public class AnimalController(
     ZooDbContext db,
     ZooSubdomain subdomains,
@@ -23,7 +19,6 @@ public class AnimalController(
 {
     private readonly ZooOptions _zoo = zooOptions.Value;
 
-    /// <summary>Список животных зоопарка (на корневом домене).</summary>
     [HttpGet]
     [Route("animals")]
     [Route("animal")]
@@ -53,12 +48,6 @@ public class AnimalController(
         return View(model);
     }
 
-    /// <summary>
-    /// Персональная страница животного.
-    /// Поддомен: https://raccoon.zoostav.ru/   (промежуточное ПО переписывает путь на /animal/raccoon)
-    /// Корневой домен: https://zoostav.ru/raccoon -> 301 на поддомен
-    /// Локальный стенд/песочница: /animal/raccoon
-    /// </summary>
     [HttpGet]
     [Route("animal/{slug}", Name = "animal-page")]
     [Route("{slug}", Name = "animal-pretty-path", Order = 100)]
@@ -67,17 +56,15 @@ public class AnimalController(
         var hostSlug = subdomains.GetAnimalSlug(Request.Host.Host);
         var requestedSlug = hostSlug ?? slug;
 
-        // Публичные страницы разрешены всем (в т.ч. неавторизованным посетителям).
         if (string.IsNullOrWhiteSpace(requestedSlug) || !SlugChecker.IsValid(requestedSlug))
         {
-            // Корневой домен без указания животного — отправляем на каталог.
             return RedirectToAction(nameof(Index));
         }
 
         var animal = await db.Animals
             .Include(a => a.Media)
             .Include(a => a.Donations)
-            .AsSplitQuery()   // две коллекции: разбиваем на отдельные SQL-запросы
+            .AsSplitQuery()
             .AsNoTracking()
             .FirstOrDefaultAsync(a => a.Slug == requestedSlug, ct);
 
@@ -86,7 +73,6 @@ public class AnimalController(
             return NotFound($"Животное «{requestedSlug}» не найдено в базе зоопарка.");
         }
 
-        // На боевом корневом домене короткий адрес zoostav.ru/raccoon уводит на поддомен животного.
         if (hostSlug is null && subdomains.IsRootDomain(Request.Host.Host))
         {
             var target = subdomains.BuildAnimalUrl(animal.Slug);
@@ -120,7 +106,6 @@ public class AnimalController(
         return View(model);
     }
 
-    /// <summary>Информация о поддомен-роутинге (демонстрация для защиты работы).</summary>
     [HttpGet("routing", Name = "animal-routing")]
     public async Task<IActionResult> Routing(CancellationToken ct)
     {

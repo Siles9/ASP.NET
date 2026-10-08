@@ -16,7 +16,6 @@ public class ZooDbContext : IdentityDbContext<ZooUser>
     public DbSet<Donation> Donations => Set<Donation>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
-    /// <summary>Поиск по дневнику: нормализуем текст записи при сохранении.</summary>
     private void NormalizeDiarySearchText()
     {
         foreach (var entry in ChangeTracker.Entries<DiaryEntry>()

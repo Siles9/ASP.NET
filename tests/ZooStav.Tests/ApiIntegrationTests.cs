@@ -9,10 +9,6 @@ using Xunit;
 
 namespace ZooStav.Tests;
 
-/// <summary>
-/// Интеграционные тесты: поднимают всё приложение (со SQLite) и проверяют
-/// страницу животного на поддомене, REST API и разграничение прав по ролям.
-/// </summary>
 public class ApiIntegrationTests : IClassFixture<ZooWebApplicationFactory>
 {
     private readonly ZooWebApplicationFactory _factory;
@@ -40,9 +36,9 @@ public class ApiIntegrationTests : IClassFixture<ZooWebApplicationFactory>
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Енот-полоскун", html);
-        Assert.Contains("https://zoostav.ru", html);          // обязательная ссылка на главную зоопарка
-        Assert.Contains("id=\"webcam\"", html);               // веб-камера
-        Assert.Contains("id=\"donate\"", html);               // донат
+        Assert.Contains("https://zoostav.ru", html);
+        Assert.Contains("id=\"webcam\"", html);
+        Assert.Contains("id=\"donate\"", html);
     }
 
     [Fact]
@@ -58,7 +54,7 @@ public class ApiIntegrationTests : IClassFixture<ZooWebApplicationFactory>
         Assert.Equal("https://zoostav.ru", data.GetProperty("zooMainSiteUrl").GetString());
         Assert.Equal("https://raccoon.zoostav.ru/", data.GetProperty("subdomainUrl").GetString());
         Assert.True(data.GetProperty("photos").GetArrayLength() > 0);
-        Assert.True(data.GetProperty("diaryAvailable").ValueKind == JsonValueKind.False); // анонимный запрос
+        Assert.True(data.GetProperty("diaryAvailable").ValueKind == JsonValueKind.False);
     }
 
     [Fact]
@@ -95,7 +91,6 @@ public class ApiIntegrationTests : IClassFixture<ZooWebApplicationFactory>
         Assert.Equal("keeper@zoostav.ru", data.GetProperty("userName").GetString());
         Assert.Equal("Api", data.GetProperty("createdVia").GetString());
 
-        // запись видна в списке дневника животного (публичное чтение)
         var list = await client.GetFromJsonAsync<JsonElement>("/api/animals/raccoon/diary?type=Feeding&search=Тестовое");
         Assert.True(list.GetProperty("data").GetProperty("totalCount").GetInt32() >= 1);
     }
@@ -199,18 +194,12 @@ public class ApiIntegrationTests : IClassFixture<ZooWebApplicationFactory>
     }
 }
 
-/// <summary>
-/// Фабрика приложения для тестов: БД — SQLite во временном файле,
-/// демо-данные создаются при старте (как и в обычном запуске).
-/// </summary>
 public class ZooWebApplicationFactory : WebApplicationFactory<Program>
 {
     private readonly string _dbPath = Path.Combine(Path.GetTempPath(), $"zoostav-tests-{Guid.NewGuid():N}.db");
 
     public ZooWebApplicationFactory()
     {
-        // Program.cs читает настройки сразу при создании билдера, поэтому конфигурацию
-        // передаём переменными окружения — до запуска приложения.
         Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
         Environment.SetEnvironmentVariable("Database__Provider", "Sqlite");
         Environment.SetEnvironmentVariable("Database__FailFast", "true");
@@ -232,7 +221,7 @@ public class ZooWebApplicationFactory : WebApplicationFactory<Program>
 
         if (disposing && File.Exists(_dbPath))
         {
-            try { File.Delete(_dbPath); } catch (IOException) { /* файл БД удалится ОС */ }
+            try { File.Delete(_dbPath); } catch (IOException) {  }
         }
     }
 }

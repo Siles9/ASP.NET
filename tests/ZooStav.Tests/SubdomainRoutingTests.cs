@@ -4,10 +4,6 @@ using Xunit;
 
 namespace ZooStav.Tests;
 
-/// <summary>
-/// Тесты роутинга поддоменов: приложение должно понимать, что запрос
-/// на raccoon.zoostav.ru — это страница животного "raccoon", а zoostav.ru — главная зоопарка.
-/// </summary>
 public class SubdomainRoutingTests
 {
     private static ZooSubdomain Create(params string[] ignored)

@@ -10,13 +10,6 @@ using ZooStav.Web.ViewModels.Api;
 
 namespace ZooStav.Web.Controllers.Api;
 
-/// <summary>
-/// API донатов на корм/лечение (free donation — доступно анонимно).
-///
-/// POST /api/donations                     — оформить донат
-/// GET  /api/donations/{slug}              — донаты животного (публичная отчётность)
-/// GET  /api/donations/{slug}/summary      — сводка по назначениям
-/// </summary>
 [ApiController]
 [Route("api/donations")]
 [Produces("application/json")]
@@ -99,7 +92,6 @@ public class ApiDonationsController(
 
         var total = await query.CountAsync(ct);
 
-        // SUM по decimal считаем на клиенте: совместимо и с SQL Server, и с SQLite.
         var sum = (await query.Select(d => d.Amount).ToListAsync(ct)).Sum();
 
         var items = await query

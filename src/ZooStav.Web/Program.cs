@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using ZooStav.Web.Data;
 using ZooStav.Web.Domain;
 using ZooStav.Web.Hubs;
@@ -19,19 +19,12 @@ using ZooStav.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ------------------------------------------------------------------
-// 1. Конфигурация (домены, JWT, строка подключения)
-// ------------------------------------------------------------------
 builder.Services.Configure<ZooOptions>(builder.Configuration.GetSection(ZooOptions.SectionName));
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
 
 var zooOptions = builder.Configuration.GetSection(ZooOptions.SectionName).Get<ZooOptions>() ?? new ZooOptions();
 var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
 
-// ------------------------------------------------------------------
-// 2. База данных: SQL Server (по умолчанию) или SQLite (демо-режим)
-//    Переключение: Database:Provider = SqlServer | Sqlite
-// ------------------------------------------------------------------
 var dbProvider = builder.Configuration["Database:Provider"] ?? "SqlServer";
 var connectionString = dbProvider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase)
     ? builder.Configuration.GetConnectionString("Sqlite")
@@ -49,9 +42,6 @@ builder.Services.AddDbContext<ZooDbContext>(options =>
     }
 });
 
-// ------------------------------------------------------------------
-// 3. Identity (пользователи, роли, cookie-вход для MVC)
-// ------------------------------------------------------------------
 builder.Services
     .AddIdentity<ZooUser, IdentityRole>(options =>
     {
@@ -76,15 +66,11 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.SameSite = SameSiteMode.Lax;
 
-    // Для боевого домена cookie общая для всех поддоменов (*.zoostav.ru),
-    // чтобы сотрудник, вошедший на raccoon.zoostav.ru, оставался авторизован и на zoostav.ru.
     if (!string.IsNullOrWhiteSpace(zooOptions.CookieDomain))
     {
         options.Cookie.Domain = zooOptions.CookieDomain;
     }
 
-    // Для API-запросов вместо редиректа на страницу входа возвращаем JSON 401/403 —
-    // так клиенты REST API получают корректный ответ, а страницы сайта по-прежнему редиректятся.
     options.Events = new CookieAuthenticationEvents
     {
         OnRedirectToLogin = context => WriteApiErrorOrRedirectAsync(context, StatusCodes.Status401Unauthorized,
@@ -107,13 +93,6 @@ static Task WriteApiErrorOrRedirectAsync(RedirectContext<CookieAuthenticationOpt
     return Task.CompletedTask;
 }
 
-// ------------------------------------------------------------------
-// 4. JWT для REST API (в дополнение к cookie: две схемы аутентификации)
-// ------------------------------------------------------------------
-// Две схемы аутентификации в одном приложении:
-//  * Cookie  — для страниц сайта (браузер);
-//  * JWT Bearer — для REST API (заголовок Authorization: Bearer <token>).
-// Схема-селектор "ZooAuth" выбирает нужную схему по виду запроса.
 builder.Services
     .AddAuthentication(options =>
     {
@@ -148,7 +127,6 @@ builder.Services
             NameClaimType = System.Security.Claims.ClaimTypes.Name
         };
 
-        // SignalR и скачивание файлов не могут передать заголовок Authorization — читаем токен из query string.
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
@@ -165,7 +143,6 @@ builder.Services
             },
             OnChallenge = context =>
             {
-                // API отвечает JSON-ошибкой вместо редиректа на страницу входа.
                 context.HandleResponse();
                 if (!context.Response.HasStarted)
                 {
@@ -204,9 +181,6 @@ builder.Services.AddAuthorization(options =>
               .RequireRole(ZooRoles.Staff));
 });
 
-// ------------------------------------------------------------------
-// 5. MVC, Swagger, SignalR, сервисы приложения
-// ------------------------------------------------------------------
 builder.Services
     .AddControllersWithViews()
     .AddJsonOptions(options =>
@@ -226,8 +200,6 @@ builder.Services.AddScoped<IDiaryService, DiaryService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddSingleton<IPaymentService, MockPaymentService>();
 
-// Кириллица в HTML: Razor по умолчанию кодирует её как &#x415;&#x43D;… —
-// настраиваем encoder, чтобы разметка оставалась читаемой (и меньше по размеру).
 builder.Services.AddSingleton<HtmlEncoder>(HtmlEncoder.Create(UnicodeRanges.All));
 
 builder.Services.AddEndpointsApiExplorer();
@@ -252,15 +224,9 @@ builder.Services.AddSwaggerGen(options =>
         Description = "Вставьте accessToken, полученный в POST /api/auth/login"
     });
 
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
     {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-            },
-            Array.Empty<string>()
-        }
+        [new OpenApiSecuritySchemeReference("Bearer", document)] = []
     });
 
     options.UseInlineDefinitionsForEnums();
@@ -268,9 +234,6 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-// ------------------------------------------------------------------
-// 6. Конвейер обработки запросов
-// ------------------------------------------------------------------
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
@@ -289,8 +252,6 @@ if (app.Configuration.GetValue("Zoo:UseHttpsRedirection", true) && !app.Environm
 
 app.UseStaticFiles();
 
-// Роутинг поддомена животного: raccoon.zoostav.ru/ -> внутренний путь /animal/raccoon.
-// ВАЖНО: middleware стоит до UseRouting, иначе выбор эндпоинта произойдёт по исходному пути.
 app.UseSubdomainRouting();
 
 app.UseRouting();
@@ -322,9 +283,6 @@ app.MapGet("/health", () => Results.Ok(new
     timeUtc = DateTime.UtcNow
 })).AllowAnonymous();
 
-// ------------------------------------------------------------------
-// 7. Инициализация БД (миграции + демо-данные)
-// ------------------------------------------------------------------
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 try
 {
@@ -335,7 +293,7 @@ catch (Exception ex)
     logger.LogError(ex,
         "Не удалось инициализировать базу данных (провайдер: {Provider}). " +
         "Проверьте строку подключения ConnectionStrings:{Key} или запустите приложение в демо-режиме SQLite: " +
-        "Database__Provider=Sqlite. Подробности в README.md.",
+        "Database__Provider=Sqlite. Подробности в README.txt.",
         dbProvider, dbProvider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase) ? "Sqlite" : "SqlServer");
 
     if (app.Configuration.GetValue("Database:FailFast", true))
@@ -346,7 +304,6 @@ catch (Exception ex)
 
 app.Run();
 
-/// <summary>Точка входа (public — для интеграционных тестов через WebApplicationFactory).</summary>
 public partial class Program
 {
 }

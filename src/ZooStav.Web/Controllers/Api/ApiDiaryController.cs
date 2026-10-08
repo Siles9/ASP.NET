@@ -13,24 +13,6 @@ using ZooStav.Web.ViewModels.Api;
 
 namespace ZooStav.Web.Controllers.Api;
 
-/// <summary>
-/// API дневника наблюдений (кормёжка, вакцинация, спаривание, потомство, болезни и пр.).
-///
-/// ЧТЕНИЕ:
-///   GET /api/animals/{slug}/diary  — записи конкретного животного
-///   GET /api/diary                 — все записи, с фильтрацией
-///   GET /api/diary/{id}            — одна запись
-/// ЗАПИСЬ (только роль Staff):
-///   POST   /api/animals/{slug}/diary
-///   PUT    /api/diary/{id}
-///   DELETE /api/diary/{id}
-///
-/// Параметры фильтрации (query string):
-///   type=Feeding|Vaccination|Mating|Offspring|Illness|Treatment|Measurement|Relocation|Observation|Other
-///   dateFrom=2026-01-01  dateTo=2026-12-31
-///   user=keeper@zoostav.ru | userId=&lt;guid&gt;
-///   search=текст  sort=date_desc|date_asc|type|user|created_desc  page=1  pageSize=20
-/// </summary>
 [ApiController]
 [Route("api")]
 [Produces("application/json")]
@@ -206,7 +188,6 @@ public class ApiDiaryController(
         return Ok(ApiResponse.OkMessage($"Запись #{id} удалена."));
     }
 
-    /// <summary>Справочник типов записей дневника (для клиентов и фильтров).</summary>
     [HttpGet("diary/types")]
     [AllowAnonymous]
     public IActionResult GetTypes() =>

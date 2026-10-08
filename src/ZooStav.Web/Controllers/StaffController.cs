@@ -8,10 +8,6 @@ using ZooStav.Web.Services;
 
 namespace ZooStav.Web.Controllers;
 
-/// <summary>
-/// Служебный раздел зоопарка. Доступен только роли Staff —
-/// демонстрация авторизации по ролям (посетитель получит 403 / страницу «Доступ запрещён»).
-/// </summary>
 [Authorize(Roles = ZooRoles.Staff)]
 [Route("staff")]
 public class StaffController(
@@ -19,7 +15,6 @@ public class StaffController(
     UserManager<ZooUser> userManager,
     IAuditService audit) : Controller
 {
-    /// <summary>Журнал действий пользователей (кто, когда, что делал).</summary>
     [HttpGet("audit")]
     public async Task<IActionResult> Audit(string? action = null, bool? success = null, int page = 1, CancellationToken ct = default)
     {
@@ -55,7 +50,6 @@ public class StaffController(
         return View(items);
     }
 
-    /// <summary>Управление пользователями и ролями.</summary>
     [HttpGet("users")]
     public async Task<IActionResult> Users(CancellationToken ct)
     {

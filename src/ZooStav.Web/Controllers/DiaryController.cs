@@ -10,13 +10,6 @@ using ZooStav.Web.ViewModels;
 
 namespace ZooStav.Web.Controllers;
 
-/// <summary>
-/// Дневник наблюдений особи/популяции.
-///
-/// ЧТЕНИЕ (Index, Details) — доступно авторизованным пользователям (роли Visitor и Staff).
-/// ЗАПИСЬ (Create, Edit, Delete) — только роли Staff (работники зоопарка).
-/// Неавторизованные пользователи перенаправляются на страницу входа.
-/// </summary>
 [Authorize]
 public class DiaryController(
     ZooDbContext db,
@@ -24,7 +17,6 @@ public class DiaryController(
     IAuditService audit,
     ZooSubdomain subdomains) : Controller
 {
-    /// <summary>Фильтруемый список записей дневника.</summary>
     [HttpGet]
     [Route("diary")]
     [Route("diary/index")]
@@ -92,7 +84,6 @@ public class DiaryController(
         return View(model);
     }
 
-    /// <summary>Карточка отдельной записи дневника.</summary>
     [HttpGet("diary/{id:int}")]
     public async Task<IActionResult> Details(int id, CancellationToken ct)
     {
@@ -111,7 +102,6 @@ public class DiaryController(
         return View(entry);
     }
 
-    /// <summary>Форма новой записи. Только работники зоопарка.</summary>
     [Authorize(Roles = ZooRoles.Staff)]
     [HttpGet("diary/create")]
     public async Task<IActionResult> Create(int? animalId, CancellationToken ct)
@@ -171,7 +161,6 @@ public class DiaryController(
         return RedirectToAction(nameof(Index), new { slug });
     }
 
-    /// <summary>Редактирование записи. Только работники зоопарка.</summary>
     [Authorize(Roles = ZooRoles.Staff)]
     [HttpGet("diary/edit/{id:int}")]
     public async Task<IActionResult> Edit(int id, CancellationToken ct)
@@ -225,7 +214,6 @@ public class DiaryController(
         return RedirectToAction(nameof(Details), new { id });
     }
 
-    /// <summary>Удаление записи. Только работники зоопарка.</summary>
     [Authorize(Roles = ZooRoles.Staff)]
     [HttpPost("diary/delete/{id:int}")]
     [ValidateAntiForgeryToken]

@@ -1,4 +1,3 @@
-# Сборка .NET
 bin/
 obj/
 *.user
@@ -8,7 +7,6 @@ obj/
 .idea/
 *.DotSettings.user
 
-# Результаты сборки
 [Dd]ebug/
 [Rr]elease/
 x64/
@@ -18,7 +16,6 @@ artifacts/
 *.dll.config
 *.nupkg
 
-# Локальная БД (создаётся автоматически при первом запуске)
 *.db
 *.db-shm
 *.db-wal
@@ -26,7 +23,6 @@ artifacts/
 *.ldf
 App_Data/
 
-# Логи и временные файлы
 *.log
 logs/
 *.tmp
@@ -35,13 +31,11 @@ TestResults/
 *.coverage
 coverage*.xml
 
-# Пользовательские секреты
 secrets.json
 appsettings.Local.json
 appsettings.Production.json
 *.pfx
 *.snk
 
-# ОС
 .DS_Store
 Thumbs.db

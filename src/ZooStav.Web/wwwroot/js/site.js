@@ -1,10 +1,6 @@
-/* ============================================================
-   ZooStav — клиентские скрипты страницы животного
-   ============================================================ */
 (function () {
     'use strict';
 
-    // ---------- Автоскрытие уведомления ----------
     var toast = document.getElementById('zooToast');
     if (toast) {
         setTimeout(function () {
@@ -14,7 +10,6 @@
         }, 6000);
     }
 
-    // ---------- Быстрый выбор суммы доната ----------
     document.querySelectorAll('.zoo-preset').forEach(function (button) {
         button.addEventListener('click', function () {
             var input = document.querySelector('input[name="Amount"]');
@@ -25,7 +20,6 @@
         });
     });
 
-    // ---------- Живые обновления дневника (SignalR) ----------
     var config = window.zooLive;
     if (!config || typeof signalR === 'undefined') {
         setLiveStatus('нет соединения (скрипт SignalR не загружен)');

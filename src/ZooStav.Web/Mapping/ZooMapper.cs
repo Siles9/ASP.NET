@@ -5,7 +5,6 @@ using ZooStav.Web.ViewModels.Api;
 
 namespace ZooStav.Web.Mapping;
 
-/// <summary>Преобразование сущностей в DTO для REST API.</summary>
 public static class ZooMapper
 {
     public static ApiAnimalDto ToDto(this Animal animal, ZooSubdomain subdomains, bool diaryAvailable, string? baseUrl = null)
@@ -106,7 +105,6 @@ public static class ZooMapper
         CreatedAtUtc = DateTime.SpecifyKind(user.CreatedAtUtc, DateTimeKind.Utc)
     };
 
-    /// <summary>Локальные ссылки делаем абсолютными (удобно для внешних API-клиентов).</summary>
     private static string Resolve(string url, string? baseUrl)
     {
         if (string.IsNullOrWhiteSpace(url) || baseUrl is null)

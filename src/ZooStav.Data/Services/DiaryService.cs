@@ -5,29 +5,20 @@ using ZooStav.Web.Domain;
 
 namespace ZooStav.Web.Services;
 
-/// <summary>
-/// Параметры фильтрации дневника (по дате, типу, пользователю, животному, тексту).
-/// Используется одинаково и в MVC (query string), и в REST API (query params).
-/// </summary>
 public class DiaryFilter
 {
     public int? AnimalId { get; set; }
     public string? Slug { get; set; }
     public DiaryEntryType? Type { get; set; }
 
-    /// <summary>Дата "с" (включительно), формат yyyy-MM-dd.</summary>
     public DateOnly? DateFrom { get; set; }
 
-    /// <summary>Дата "по" (включительно), формат yyyy-MM-dd.</summary>
     public DateOnly? DateTo { get; set; }
 
-    /// <summary>Фильтр по логину (userName) автора записи.</summary>
     public string? UserName { get; set; }
 
-    /// <summary>Фильтр по идентификатору пользователя-автора.</summary>
     public string? UserId { get; set; }
 
-    /// <summary>Поиск по подстроке в заголовке и описании.</summary>
     public string? Search { get; set; }
 
     public string Sort { get; set; } = "date_desc";
@@ -60,9 +51,6 @@ public interface IDiaryService
     Task<DiaryEntry> AddAsync(DiaryEntry entry, CancellationToken ct = default);
 }
 
-/// <summary>
-/// Единая точка доступа к дневнику наблюдений: фильтрация, сортировка, постраничный вывод.
-/// </summary>
 public class DiaryService(ZooDbContext db) : IDiaryService
 {
     public IQueryable<DiaryEntry> BuildQuery(DiaryFilter filter)
@@ -116,8 +104,6 @@ public class DiaryService(ZooDbContext db) : IDiaryService
 
         if (filter.Search is not null)
         {
-            // Поиск по нормализованному полю SearchText (нижний регистр, включая кириллицу):
-            // одинаково работает и на SQL Server, и на SQLite.
             var text = filter.Search.ToLowerInvariant().Replace('ё', 'е');
             query = query.Where(d => d.SearchText.Contains(text));
         }
