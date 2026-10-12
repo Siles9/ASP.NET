@@ -58,7 +58,7 @@ curl -X POST "/api/animals/raccoon/diary" \
 curl "/api/animals/raccoon/diary?type=Vaccination&dateFrom=2026-01-01&sort=date_desc&pageSize=5"
 
 # 4. Проверить, что гость не может писать: без токена вернётся 401
-curl -X POST "/api/animals/raccoon/diary" -H "Content-Type: application/json" -d "{\"title\":\"test\"}"</pre>
+curl -X POST "/api/animals/raccoon/diary" -H "Content-Type: application/json" -d "{\"title\":\"Демо-запись\"}"</pre>
 
         <div class="zoo-api-links">
             <a class="btn btn-accent" href="/swagger" target="_blank">Открыть Swagger UI</a>

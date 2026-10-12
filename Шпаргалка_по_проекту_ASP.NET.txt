@@ -4,9 +4,9 @@
 
 1. ЧТО ЭТО ЗА ПРОЕКТ
 ------------------------------------------------------------
-Стек: .NET 8, ASP.NET Core MVC, Razor Views, EF Core, Identity,
+Стек: .NET 10, ASP.NET Core MVC, Razor Views, EF Core, Identity,
 SQLite (основная локальная БД) / SQL Server, REST API + JWT,
-SignalR, Swagger, xUnit.
+SignalR, Swagger.
 
 Основные сценарии:
 - публичная страница животного: описание, история, фото/видео,
@@ -27,7 +27,7 @@ Staff ведёт дневник; Visitor может читать, но не из
 
 2. ПЕРВЫЙ ЗАПУСК И ПРОВЕРКА
 ------------------------------------------------------------
-Нужен .NET SDK 8. SQL Server для обычного локального запуска не нужен.
+Нужен .NET SDK 10. SQL Server для обычного локального запуска не нужен.
 Из корня репозитория (папка, где лежит ZooStav.sln):
 
   dotnet --version
@@ -54,9 +54,8 @@ ZooStav.Web. Он использует SQLite и открывает http://local
   2) / открывается; затем проверьте поддомен raccoon.localhost.
   3) войдите keeper@zoostav.ru / Keeper#2026.
   4) откройте /diary; Staff видит кнопки ведения дневника.
-  5) запустите тесты: dotnet test ZooStav.sln
 
-Если dotnet не найден — требуется установить .NET 8 SDK.
+Если dotnet не найден — требуется установить .NET 10 SDK.
 Если занят порт 5045, можно запустить без профиля на другом порту:
   dotnet run --project src/ZooStav.Web --no-launch-profile -- --urls http://localhost:5050
 Тогда используйте URL с портом 5050 и резервный путь /animal/raccoon.
@@ -108,7 +107,6 @@ src/ZooStav.Web/
 
 src/ZooStav.Migrations.Sqlite/    — миграции SQLite.
 src/ZooStav.Migrations.SqlServer/ — миграции SQL Server.
-tests/ZooStav.Tests/              — модульные и интеграционные тесты.
 docs/API.md                       — маршруты API и примеры запросов.
 docs/DEPLOY.md                    — домен, DNS, nginx/IIS, публикация.
 
@@ -154,7 +152,6 @@ Middleware поддомена должен стоять ДО app.UseRouting() в
   3) ViewModel/DTO — только если данные идут через форму или API.
   4) View/Controller/Mapper — отобразить или обработать поле.
   5) Создать миграции для SQLite И SQL Server, затем применить их.
-  6) Добавить тест на новый сценарий.
 
 Добавить поле в форму:
   ViewModels/ViewModels.cs -> View (asp-for) -> POST action Controller.
@@ -165,7 +162,7 @@ Middleware поддомена должен стоять ДО app.UseRouting() в
 Добавить тип дневниковой записи:
   Domain/Entities.cs: DiaryEntryType;
   Data/Services/DiaryService.cs: DiaryEntryTypeExtensions.Title();
-  проверить формы и API DTO, добавить тест.
+  проверить формы и API DTO.
   Выпадающий список MVC строится по Enum.GetValues<DiaryEntryType>().
 
 Добавить/изменить маршрут:
@@ -196,7 +193,7 @@ SQLite — провайдер по умолчанию; его миграции �
 Изменение класса Entity само по себе НЕ меняет существующую схему БД.
 
 Если dotnet-ef ещё не установлен, сначала:
-  dotnet tool install --global dotnet-ef --version 8.0.31
+  dotnet tool install --global dotnet-ef --version 10.0.0
 
 Из корня решения создать миграцию SQLite:
   dotnet ef migrations add AddMyChange \
@@ -216,7 +213,7 @@ SQLite — провайдер по умолчанию; его миграции �
 
 Перед командой для SQL Server задайте Database__Provider=SqlServer
 (в PowerShell: $env:Database__Provider="SqlServer"). Убедитесь, что миграция
-создана в правильной папке, затем выполните build/test. Приложение применяет
+создана в правильной папке, затем выполните сборку и запустите приложение. Оно применяет
 миграции при старте автоматически.
 
 Только если достаточно очистить локальную учебную БД: остановите приложение
@@ -320,7 +317,6 @@ Razor-форма:
 
 После правки проверять по порядку:
   dotnet build ZooStav.sln
-  dotnet test ZooStav.sln
   dotnet run --project src/ZooStav.Web
   /health, нужная страница, /swagger (если меняли API).
 

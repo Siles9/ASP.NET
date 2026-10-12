@@ -7,11 +7,11 @@ namespace ZooStav.Web.Infrastructure;
 
 /// <summary>
 /// Создаёт БД, применяет миграции нужного провайдера и наполняет её демонстрационными данными
-/// (животное "Енот-полоскун", тестовые пользователи, записи дневника, донаты).
+/// (животное "Енот-полоскун", демонстрационные учётные записи, записи дневника, донаты).
 /// </summary>
 public static class ZooDbInitializer
 {
-    /// <summary>Тестовые учётные записи (указаны в README для проверки).</summary>
+    /// <summary>Демо-учётные записи (указаны в README для проверки).</summary>
     public static readonly (string Email, string Password, string Role, string FullName)[] SeedUsers =
     {
         ("keeper@zoostav.ru", "Keeper#2026", ZooRoles.Staff, "Смотритель вольера Енотов"),

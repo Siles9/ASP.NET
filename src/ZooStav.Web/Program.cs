@@ -355,8 +355,3 @@ catch (Exception ex)
 }
 
 app.Run();
-
-/// <summary>Точка входа (public — для интеграционных тестов через WebApplicationFactory).</summary>
-public partial class Program
-{
-}

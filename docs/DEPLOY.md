@@ -96,7 +96,7 @@ certbot certonly --dns-<провайдер> -d zoostav.ru -d '*.zoostav.ru'
 
 ## 4. Обратный прокси: IIS (Windows)
 
-1. Установите **ASP.NET Core 8 Hosting Bundle**.
+1. Установите **ASP.NET Core 10 Hosting Bundle**.
 2. Создайте сайт с привязкой (bindings): `zoostav.ru`, `www.zoostav.ru`, `*.zoostav.ru` (порт 80 и 443),
    физический путь — папка публикации, пул приложений — «Без управляемого кода».
 3. Установите **URL Rewrite** и **Application Request Routing (ARR)**, включите проксирование на pool `http://localhost:8080`.
