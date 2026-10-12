@@ -46,10 +46,7 @@ https://raccoon.zoostav.ru
 2. ТРЕБОВАНИЯ ДЛЯ ЗАПУСКА
 --------------------------------------------------------------------
   - .NET SDK 8.0 (скачать: https://dotnet.microsoft.com/download)
-  - SQL Server (LocalDB, Express или Developer) - если запускать в обычном
-    режиме;
-  - либо ничего дополнительно устанавливать не нужно, если запускать в
-    режиме SQLite.
+  - SQL Server не нужен: основной профиль использует SQLite.
 
 Проверить установку .NET:  dotnet --version
 
@@ -57,31 +54,15 @@ https://raccoon.zoostav.ru
 --------------------------------------------------------------------
 3. КАК ЗАПУСТИТЬ
 --------------------------------------------------------------------
-Открыть терминал (командную строку) в папке проекта, где лежит файл
-ZooStav.sln, и выполнить одну из команд.
+В Visual Studio откройте ZooStav.sln, выберите стартовый проект ZooStav.Web,
+единственный профиль запуска ZooStav.Web и нажмите F5. Сразу откроется /raccoon.
 
-Вариант А. С SQL Server (основной режим):
+Из терминала в корне решения:
     dotnet run --project src/ZooStav.Web
 
-Строка подключения по умолчанию (файл src/ZooStav.Web/appsettings.json):
-    Server=(localdb)\MSSQLLocalDB;Database=ZooStavRaccoon;
-    Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True
-
-Вариант Б. С SQLite (если SQL Server не установлен):
-    Windows (PowerShell):
-        $env:Database__Provider="Sqlite"; dotnet run --project src/ZooStav.Web
-    Windows (cmd):
-        set Database__Provider=Sqlite && dotnet run --project src/ZooStav.Web
-    Linux / macOS:
-        Database__Provider=Sqlite dotnet run --project src/ZooStav.Web
-
-Вариант В. Из Visual Studio 2022:
-    открыть файл ZooStav.sln, выбрать профиль запуска
-    "ZooStav.Web (SQLite — без установки SQL Server)" и нажать F5.
-
-При первом запуске приложение само создает базу данных, применяет миграции
-и добавляет демонстрационные данные: животное, фотографии, видео, записи
-дневника и донаты. Отдельно ничего создавать не нужно.
+Профиль использует SQLite и HTTP, поэтому не требует SQL Server или
+настройки HTTPS-сертификата. При первом запуске приложение создаёт БД,
+применяет миграции и добавляет начальные данные автоматически.
 
 
 --------------------------------------------------------------------

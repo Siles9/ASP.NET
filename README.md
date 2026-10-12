@@ -37,46 +37,29 @@ curl -X POST http://localhost:5045/api/auth/login \
 
 ### 2.1. Требования
 
-* .NET SDK 8.0
-* SQL Server (LocalDB/Express/Developer) — **или** ничего дополнительно, если запускать в режиме SQLite
+* .NET SDK 8.0. SQL Server устанавливать не нужно: используется SQLite.
 
-### 2.2. Вариант А. SQL Server (основной режим)
+### 2.2. Единственный профиль Visual Studio / быстрый запуск
+
+Откройте `ZooStav.sln`, выберите стартовый проект **ZooStav.Web** и профиль запуска
+**ZooStav.Web**, затем нажмите F5. Страница енота откроется сразу по `/raccoon`.
+Профиль использует SQLite и HTTP, поэтому не требует ни SQL Server, ни настройки HTTPS-сертификата.
+
+Из командной строки в корне репозитория:
 
 ```bash
-git clone https://github.com/Siles9/ASP.NET.git
-cd ASP.NET
-
-# строка подключения — в src/ZooStav.Web/appsettings.json
-# по умолчанию: Server=(localdb)\MSSQLLocalDB;Database=ZooStavRaccoon;Trusted_Connection=True
 dotnet run --project src/ZooStav.Web
 ```
 
-Первый запуск сам создаёт базу (миграции применяются автоматически) и наполняет её демо-данными.
+При первом запуске приложение само создаёт локальную базу, применяет миграции,
+добавляет начальные данные и учётные записи. SQLite — единственный профиль Visual Studio
+для локальной работы.
 
-### 2.3. Вариант Б. SQLite (если SQL Server не установлен)
-
-```bash
-dotnet run --project src/ZooStav.Web --launch-profile "ZooStav.Web (SQLite — без установки SQL Server)"
-```
-
-или без профиля запуска:
-
-```bash
-# Linux / macOS
-Database__Provider=Sqlite dotnet run --project src/ZooStav.Web
-
-# Windows PowerShell
-$env:Database__Provider="Sqlite"; dotnet run --project src/ZooStav.Web
-```
-
-Оба варианта дают одинаковый функционал: всё работает через EF Core, отличается только провайдер
-(миграции лежат в отдельных сборках — `ZooStav.Migrations.SqlServer` и `ZooStav.Migrations.Sqlite`).
-
-### 2.4. Адреса после запуска
+### 2.3. Адреса после запуска
 
 | Адрес | Что это |
 |---|---|
-| `http://localhost:5045/` и `https://localhost:7117/` | главная страница приложения (витрина зоопарка, ссылки на поддомены) |
+| `http://localhost:5045/` | главная страница приложения (витрина зоопарка, ссылки на поддомены) |
 | `http://raccoon.localhost:5045/` | **страница животного на поддомене** (браузеры резолвят `*.localhost` в 127.0.0.1) |
 | `http://localhost:5045/raccoon` | тот же контент по пути (резервный вариант для демо-стендов) |
 | `http://localhost:5045/diary` | дневник наблюдений с фильтрами (нужен вход) |
@@ -84,7 +67,7 @@ $env:Database__Provider="Sqlite"; dotnet run --project src/ZooStav.Web
 | `http://localhost:5045/swagger` | Swagger UI для REST API |
 | `http://localhost:5045/health` | health-check |
 
-### 2.5. Запуск в Docker (приложение + SQL Server)
+### 2.4. Запуск в Docker (приложение + SQL Server)
 
 ```bash
 docker compose up --build     # http://localhost:8080  (страница животного: /raccoon)

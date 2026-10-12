@@ -29,17 +29,27 @@ var zooOptions = builder.Configuration.GetSection(ZooOptions.SectionName).Get<Zo
 var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
 
 // ------------------------------------------------------------------
-// 2. База данных: SQL Server (по умолчанию) или SQLite (демо-режим)
+// 2. База данных: SQLite используется по умолчанию, SQL Server можно включить настройкой.
 //    Переключение: Database:Provider = SqlServer | Sqlite
 // ------------------------------------------------------------------
-var dbProvider = builder.Configuration["Database:Provider"] ?? "SqlServer";
-var connectionString = dbProvider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase)
-    ? builder.Configuration.GetConnectionString("Sqlite")
-    : builder.Configuration.GetConnectionString("SqlServer");
+var configuredDbProvider = builder.Configuration["Database:Provider"];
+var dbProvider = string.IsNullOrWhiteSpace(configuredDbProvider) ? "Sqlite" : configuredDbProvider.Trim();
+var useSqlite = dbProvider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase);
+
+if (!useSqlite && !dbProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+{
+    throw new InvalidOperationException(
+        $"Неизвестный провайдер базы данных '{dbProvider}'. Допустимые значения: Sqlite, SqlServer.");
+}
+
+var connectionString = useSqlite
+    ? builder.Configuration.GetConnectionString("Sqlite") ?? "Data Source=zoostav-raccoon.db"
+    : builder.Configuration.GetConnectionString("SqlServer")
+      ?? throw new InvalidOperationException("Не задана строка подключения ConnectionStrings:SqlServer.");
 
 builder.Services.AddDbContext<ZooDbContext>(options =>
 {
-    if (dbProvider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
+    if (useSqlite)
     {
         options.UseSqlite(connectionString, m => m.MigrationsAssembly("ZooStav.Migrations.Sqlite"));
     }

@@ -1,0 +1,334 @@
+ШПАРГАЛКА ПО ПРОЕКТУ ASP.NET Core MVC
+Проект ZooStav — персональная страница енота Тимки
+============================================================
+
+1. ЧТО ЭТО ЗА ПРОЕКТ
+------------------------------------------------------------
+Стек: .NET 8, ASP.NET Core MVC, Razor Views, EF Core, Identity,
+SQLite (основная локальная БД) / SQL Server, REST API + JWT,
+SignalR, Swagger, xUnit.
+
+Основные сценарии:
+- публичная страница животного: описание, история, фото/видео,
+  веб-камера, донаты;
+- дневник наблюдений: фильтры по типу, дате, автору, тексту;
+- сотрудник Staff может создавать/редактировать/удалять записи;
+- обычные посетители Visitor не могут менять дневник;
+- страница енота открывается на поддомене raccoon.localhost.
+
+Предустановленные аккаунты (создаются при первом запуске):
+  Staff:   keeper@zoostav.ru / Keeper#2026
+  Visitor: visitor@zoostav.ru / Visitor#2026
+
+Staff ведёт дневник; Visitor может читать, но не изменять записи.
+Пароли учебные; не использовать на опубликованном настоящем сайте.
+Также можно зарегистрировать нового посетителя.
+
+
+2. ПЕРВЫЙ ЗАПУСК И ПРОВЕРКА
+------------------------------------------------------------
+Нужен .NET SDK 8. SQL Server для обычного локального запуска не нужен.
+Из корня репозитория (папка, где лежит ZooStav.sln):
+
+  dotnet --version
+  dotnet restore ZooStav.sln
+  dotnet run --project src/ZooStav.Web
+
+В Visual Studio выберите стартовый проект ZooStav.Web и единственный профиль
+ZooStav.Web. Он использует SQLite и открывает http://localhost:5045/raccoon.
+При первом старте приложение создаёт файл zoostav-raccoon.db, применяет
+миграции и добавляет две демонстрационные учётные записи и начальные данные.
+
+Адреса:
+  http://localhost:5045/raccoon — страница енота (открывается по умолчанию)
+  http://raccoon.localhost:5045/ — та же страница на локальном поддомене
+  http://localhost:5045/         — главная/каталог
+  http://localhost:5045/animal/raccoon — альтернативный адрес страницы енота
+  http://localhost:5045/Account/Login — вход
+  http://localhost:5045/diary      — дневник (требуется вход)
+  http://localhost:5045/swagger    — Swagger UI
+  http://localhost:5045/health     — состояние приложения
+
+Мини-проверка:
+  1) /health отвечает status=ok.
+  2) / открывается; затем проверьте поддомен raccoon.localhost.
+  3) войдите keeper@zoostav.ru / Keeper#2026.
+  4) откройте /diary; Staff видит кнопки ведения дневника.
+  5) запустите тесты: dotnet test ZooStav.sln
+
+Если dotnet не найден — требуется установить .NET 8 SDK.
+Если занят порт 5045, можно запустить без профиля на другом порту:
+  dotnet run --project src/ZooStav.Web --no-launch-profile -- --urls http://localhost:5050
+Тогда используйте URL с портом 5050 и резервный путь /animal/raccoon.
+
+
+3. КАРТА РЕПОЗИТОРИЯ: ГДЕ ИСКАТЬ КОД
+------------------------------------------------------------
+ZooStav.sln
+  Решение для Visual Studio и dotnet CLI.
+
+src/ZooStav.Data/
+  Domain/Entities.cs
+    Сущности и enum: ZooUser, Animal, MediaItem, DiaryEntry, Donation,
+    AuditLog, типы записей и роли.
+  Data/ZooDbContext.cs
+    DbSet, связи EF Core, индексы, нормализация текста дневника при SaveChanges.
+  Services/DiaryService.cs
+    Общие фильтры, сортировки, поиск и пагинация дневника.
+  Infrastructure/ZooOptions.cs, SlugChecker.cs
+    Настройки домена/JWT и проверка slug.
+
+src/ZooStav.Web/
+  Program.cs
+    Сервисы DI, БД, Identity, Cookie/JWT, middleware, маршруты, Swagger,
+    SignalR, health endpoint и запуск начального заполнения БД.
+  Controllers/
+    HomeController — главная и «О проекте».
+    AnimalController — каталог, страница животного, описание роутинга.
+    DiaryController — MVC-дневник и CRUD.
+    DonationController — форма и список донатов.
+    AccountController — вход, регистрация, выход, профиль.
+    StaffController — журнал действий и роли пользователей.
+  Controllers/Api/
+    ApiAnimalsController — карточки животных и медиа.
+    ApiDiaryController — REST API дневника.
+    ApiAuthController — регистрация, вход, JWT, профиль токена.
+    ApiDonationsController — REST API донатов.
+  ViewModels/ и ViewModels/Api/ — модели страниц и модели запросов/ответов API.
+  Mapping/ZooMapper.cs — перевод сущностей в DTO.
+  Infrastructure/
+    ZooDbInitializer.cs — миграции, роли, demo-аккаунты, стартовые данные.
+    ZooSubdomain.cs — определение slug по Host.
+    SubdomainRoutingExtensions.cs — middleware поддомена.
+  Services/ — JWT, журнал действий, демонстрационная оплата.
+  Views/ — Razor HTML по контроллерам; Shared/_Layout.cshtml — общий каркас.
+  wwwroot/css/site.css — стили.
+  wwwroot/js/site.js — клиентский JavaScript.
+  wwwroot/images/raccoon/ — локальные фотографии.
+
+src/ZooStav.Migrations.Sqlite/    — миграции SQLite.
+src/ZooStav.Migrations.SqlServer/ — миграции SQL Server.
+tests/ZooStav.Tests/              — модульные и интеграционные тесты.
+docs/API.md                       — маршруты API и примеры запросов.
+docs/DEPLOY.md                    — домен, DNS, nginx/IIS, публикация.
+
+
+4. КАК ПРОХОДИТ ЗАПРОС В MVC
+------------------------------------------------------------
+Браузер -> middleware из Program.cs -> маршрутизация -> Controller ->
+EF Core / Service -> ViewModel -> Views/<Controller>/<Action>.cshtml -> HTML.
+
+Например, страница животного:
+  host raccoon.localhost
+  -> UseSubdomainRouting определяет raccoon и переписывает путь / на
+     /animal/raccoon (в браузере адрес не меняется)
+  -> AnimalController.Page загружает Animal + Media через ZooDbContext
+  -> формирует AnimalPageViewModel
+  -> Views/Animal/Page.cshtml рисует страницу.
+
+Middleware поддомена должен стоять ДО app.UseRouting() в Program.cs.
+Не переставляйте этот порядок без понимания последствий.
+
+
+5. ЕСЛИ НУЖНО ИЗМЕНИТЬ...
+------------------------------------------------------------
+Текст/кнопку на странице:
+  Найти нужный файл в Views/<Controller>/.
+  Общая шапка/подвал — Views/Shared/_Layout.cshtml.
+
+Цвета, отступы, адаптивность:
+  wwwroot/css/site.css.
+
+Поведение JavaScript / SignalR в браузере:
+  wwwroot/js/site.js и, для сервера, Hubs/ZooHub.cs.
+
+Данные енота, стартовое наполнение:
+  Infrastructure/ZooDbInitializer.cs (объект Animal, список Media,
+  DiaryEntries, Donations).
+  Важно: начальные данные добавляются только если в БД ещё нет животных.
+  Изменение seed-кода не перезаписывает уже существующую запись.
+
+Добавить поле/сущность:
+  1) Domain/Entities.cs — свойство и атрибуты [Required], [MaxLength] и т. п.
+  2) Data/ZooDbContext.cs — связь/индекс/настройка, если нужны.
+  3) ViewModel/DTO — только если данные идут через форму или API.
+  4) View/Controller/Mapper — отобразить или обработать поле.
+  5) Создать миграции для SQLite И SQL Server, затем применить их.
+  6) Добавить тест на новый сценарий.
+
+Добавить поле в форму:
+  ViewModels/ViewModels.cs -> View (asp-for) -> POST action Controller.
+  На POST проверить ModelState.IsValid, сохранить через db.SaveChangesAsync().
+  После сохранения обычно вернуть RedirectToAction (PRG-паттерн).
+  Формы POST должны сохранять [ValidateAntiForgeryToken].
+
+Добавить тип дневниковой записи:
+  Domain/Entities.cs: DiaryEntryType;
+  Data/Services/DiaryService.cs: DiaryEntryTypeExtensions.Title();
+  проверить формы и API DTO, добавить тест.
+  Выпадающий список MVC строится по Enum.GetValues<DiaryEntryType>().
+
+Добавить/изменить маршрут:
+  MVC: атрибуты [Route], [HttpGet], [HttpPost] в контроллере.
+  API: Controllers/Api и базовый [Route("api/...")].
+  Поддомены: ZooSubdomain.cs + SubdomainRoutingExtensions.cs.
+  Проверить конкурирующие шаблоны маршрутов и открыть маршрут локально.
+
+Изменить вход/права:
+  MVC вход: AccountController + Views/Account/Login.cshtml.
+  Роли и seed: ZooRoles / ZooDbInitializer.cs.
+  Для страницы: [Authorize]. Только работнику: [Authorize(Roles = ZooRoles.Staff)].
+  API вход/токен: Controllers/Api/ApiAuthController.cs и JwtTokenService.cs.
+  Не убирать проверку роли только ради того, чтобы скрыть ошибку: нужно
+  оставить серверную авторизацию, даже если кнопка скрыта в Razor.
+
+Изменить API:
+  Controller/Api -> ViewModels/Api/ApiModels.cs -> Mapping/ZooMapper.cs.
+  Запросы/ответы JSON видны в Swagger: /swagger.
+  Для защищённого API токен передаётся заголовком:
+    Authorization: Bearer <accessToken>
+
+
+6. EF CORE И МИГРАЦИИ
+------------------------------------------------------------
+SQLite — провайдер по умолчанию; его миграции в ZooStav.Migrations.Sqlite.
+Для второго провайдера отдельная сборка ZooStav.Migrations.SqlServer.
+Изменение класса Entity само по себе НЕ меняет существующую схему БД.
+
+Если dotnet-ef ещё не установлен, сначала:
+  dotnet tool install --global dotnet-ef --version 8.0.31
+
+Из корня решения создать миграцию SQLite:
+  dotnet ef migrations add AddMyChange \
+    --project src/ZooStav.Migrations.Sqlite \
+    --startup-project src/ZooStav.Web \
+    --context ZooDbContext --output-dir Migrations
+
+Для SQL Server создайте аналогичную миграцию отдельно:
+  dotnet ef migrations add AddMyChange \
+    --project src/ZooStav.Migrations.SqlServer \
+    --startup-project src/ZooStav.Web \
+    --context ZooDbContext --output-dir Migrations
+
+Команды выше показаны для Bash (перенос строки — обратная косая черта).
+В PowerShell перенос строки делается обратным апострофом или команду можно
+ввести одной строкой.
+
+Перед командой для SQL Server задайте Database__Provider=SqlServer
+(в PowerShell: $env:Database__Provider="SqlServer"). Убедитесь, что миграция
+создана в правильной папке, затем выполните build/test. Приложение применяет
+миграции при старте автоматически.
+
+Только если достаточно очистить локальную учебную БД: остановите приложение
+и удалите файл zoostav-raccoon.db. Это удалит локальные изменения/записи;
+после следующего запуска база и начальные данные создадутся заново.
+Не удаляйте БД с нужными данными.
+
+
+7. ОСНОВНЫЕ МАРШРУТЫ И ДОСТУП
+------------------------------------------------------------
+MVC:
+  /                         главная
+  /animals                  список животных
+  /animal/raccoon           страница енота (резервный путь)
+  /diary                    дневник, любой вошедший пользователь
+  /diary/create             только Staff
+  /staff/audit              только Staff
+  /staff/users              только Staff
+  /Account/Login            вход сайта по cookie
+  /Account/Register         регистрация с ролью Visitor
+
+API:
+  POST /api/auth/login                 выдать JWT
+  POST /api/auth/register              создать Visitor
+  GET  /api/auth/me                    данные текущего пользователя
+  GET  /api/animals                    список животных
+  GET  /api/animals/raccoon            карточка животного
+  GET  /api/animals/raccoon/diary      дневник животного (API)
+  POST /api/animals/raccoon/diary      добавить запись (только Staff)
+  GET  /api/diary                      общий список (только Staff)
+  PUT/DELETE /api/diary/{id}           изменить/удалить (только Staff)
+  POST /api/donations                  создать донат
+
+401 = не аутентифицирован; 403 = пользователь вошёл, но роль не разрешает
+действие; 404 = маршрут/запись не найдены; 400 = ошибка данных/валидации;
+500 = ошибка приложения/конфигурации (смотреть Output/терминал).
+MVC /diary требует вход. API GET /api/animals/{slug}/diary публичен.
+
+
+8. КОРОТКИЕ ШАБЛОНЫ C# ДЛЯ ПРАВОК
+------------------------------------------------------------
+MVC GET с загрузкой сущности:
+  [HttpGet]
+  public async Task<IActionResult> Details(int id, CancellationToken ct)
+  {
+      var item = await db.Animals.AsNoTracking()
+          .FirstOrDefaultAsync(x => x.Id == id, ct);
+      return item is null ? NotFound() : View(item);
+  }
+
+POST с проверкой модели:
+  [HttpPost]
+  [ValidateAntiForgeryToken]
+  public async Task<IActionResult> Create(MyViewModel model, CancellationToken ct)
+  {
+      if (!ModelState.IsValid) return View(model);
+      // создать/обновить Entity и сохранить
+      await db.SaveChangesAsync(ct);
+      return RedirectToAction(nameof(Index));
+  }
+
+Защита только для роли работника:
+  [Authorize(Roles = ZooRoles.Staff)]
+
+Razor-форма:
+  <form asp-action="Create" method="post">
+      <div asp-validation-summary="All"></div>
+      <label asp-for="Title"></label>
+      <input asp-for="Title" />
+      <span asp-validation-for="Title"></span>
+      <button type="submit">Сохранить</button>
+  </form>
+
+
+9. ЧАСТЫЕ ОШИБКИ И БЫСТРЫЙ ДИАГНОЗ
+------------------------------------------------------------
+Страница/данные не найдены (404):
+  проверить маршрут и параметр slug; в БД ожидается slug=raccoon;
+  страница животного: /animal/raccoon или raccoon.localhost.
+
+Перенаправляет на вход (401/redirect):
+  MVC-дневник требует авторизацию. Войти основным аккаунтом.
+
+403 «Доступ запрещён»:
+  пользователь вошёл, но для записи нужна роль Staff; проверить роль,
+  а не просто состояние cookie.
+
+База/миграции:
+  проверить Database:Provider=Sqlite, строку ConnectionStrings:Sqlite,
+  вывод старта и файл zoostav-raccoon.db. SQL Server не требуется в основном
+  профиле.
+
+Пустой/необновлённый seed:
+  ZooDbInitializer не перезаписывает данные, если таблица Animals уже содержит
+  животное. Для учебного сброса остановить сервер и удалить локальный .db,
+  понимая, что это сотрёт сохранённые записи.
+
+Ошибки валидации:
+  ViewModel DataAnnotations -> ModelState.IsValid -> вывод asp-validation-for.
+  Для API при [ApiController] ошибки обычно возвращаются как HTTP 400.
+
+После правки проверять по порядку:
+  dotnet build ZooStav.sln
+  dotnet test ZooStav.sln
+  dotnet run --project src/ZooStav.Web
+  /health, нужная страница, /swagger (если меняли API).
+
+============================================================
+Короткая схема для устного объяснения:
+«Program.cs настраивает DI, SQLite/SQL Server, Identity и middleware.
+MVC-запрос попадает в Controller, данные читаются/сохраняются через EF Core
+и ZooDbContext, Controller передаёт ViewModel в Razor View. Права задаются
+Identity-ролями. REST API находится отдельно в Controllers/Api и выдаёт
+JWT. Первый запуск автоматически применяет миграции и начальные данные».
+============================================================

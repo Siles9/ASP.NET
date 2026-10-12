@@ -135,7 +135,7 @@ dotnet publish src/ZooStav.Web/ZooStav.Web.csproj -c Release -o C:\inetpub\zoost
 
 | Способ | Что делать | Адрес |
 |---|---|---|
-| Профиль запуска (ничего настраивать не нужно) | `dotnet run --launch-profile "ZooStav.Web (SQLite — без установки SQL Server)"` | `http://raccoon.localhost:5045/` |
+| Профиль запуска (ничего настраивать не нужно) | `dotnet run --launch-profile "ZooStav.Web"` | `http://localhost:5045/raccoon` |
 | Свои имена (`*.test`) | добавить в `hosts` строку `127.0.0.1 raccoon.zoostav.test` и запустить с `Zoo__RootDomain=zoostav.test` | `http://raccoon.zoostav.test:5045/` |
 | Без DNS вообще | открыть путь-резерв `/raccoon` или `/animal/raccoon` | `http://localhost:5045/raccoon` |
 | Реальный домен | опубликовать по инструкции выше | `https://raccoon.zoostav.ru/` |
@@ -168,7 +168,8 @@ nginx (см. п. 3) или cloud-балансировщик с wildcard-серт
 | Настройка | Значение по умолчанию | Рекомендация |
 |---|---|---|
 | `Jwt:Key` | демонстрационный ключ | задать длинный случайный секрет через переменные окружения / секреты |
-| `ConnectionStrings:SqlServer` | LocalDB | строка подключения к боевому SQL Server |
+| `Database:Provider` | `Sqlite` для локального запуска | на сервере можно задать `SqlServer` |
+| `ConnectionStrings:SqlServer` | LocalDB (используется только с SQL Server) | строка подключения к боевому SQL Server |
 | `Zoo:CookieDomain` | пусто | `.zoostav.ru` (единый вход на всех поддоменах) |
 | `Database:FailFast` | `true` | оставить `true`, чтобы деплой падал при недоступной БД |
 | `ASPNETCORE_ENVIRONMENT` | Development локально | `Production` на сервере |
